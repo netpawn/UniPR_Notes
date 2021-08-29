@@ -1,0 +1,242 @@
+\documentclass{article}
+\newcommand\tab[1][1cm]{\hspace*{#1}}
+\newcommand\TILDE{$\sim$}
+\usepackage[dvipsnames]{xcolor}
+\definecolor{grigio}{gray}{0.62}
+\definecolor{blu}{rgb}{0.0, 0.2, 0.6}
+\usepackage{fancyhdr}
+
+\renewcommand{\labelitemi}{$\textcolor{blu}{\bullet}$}
+\renewcommand{\labelitemii}{${\bullet}$}
+
+\usepackage{graphicx}
+\graphicspath{ {./} }
+
+\thispagestyle{fancy}
+\fancyhead[LE,RO]{Giovanni Battioni}
+\fancyhead[RE,LO]{Metodologie di Programmazione}
+\fancyfoot[CE,CO]{\thepage}
+
+\begin{document}
+\section*{\textcolor{blu}{5. Template e Libreria Standard}}
+In questo capitolo si vedono i concetti base della programmazione generica e in specifico l'utilizzo di \textbf{template}.\\Si approfondir\'a il concetto di template vedendo alcuni strumenti a supporti di essi come i \textbf{contenitori} e gli \textbf{iteratori}.
+\\ \\ \\ \\ \\
+\begin{large}\textcolor{blu}{\textbf{Template di Funzione}}\\ \\\end{large}
+Costrutto del linguaggio C++ che consente di defenire uno schema (o modello) parametrico per una funzione.\\Vediamo un esempio:\\ \\
+\texttt{\textcolor{grigio}{// Dichiarazione pura di un template di funzione.} \\ template <typename T> \\ T max(T a, T b); \\ \\ \textcolor{grigio}{ // Definizione di un template di funzione. } \\ template <typename T> \\ T max(T a, T b) \{ \\ \tab return (a > b) ? a : b; \\ \} } \\ 
+\begin{itemize}
+\item \textbf{\textcolor{blu}{Parametri}}\\Prendendo l'esempio, \texttt{T} \'e un parametro di template: il parametro viene dichiarato essere un \texttt{typename} nella lista dei parametri del template. La lista pu\'o contenere un numero arbitrario di parametri separati da virgole.\\Per convenzione si usano nomi maiuscoli per i parametri di tipo. \\
+\item \textbf{\textcolor{blu}{Istanziazione}}\\Dato un template, \'e possibile generare da esso pi\'u funzioni mediante il meccanismo di istanziazione, che fornisce un \textbf{argomento} (della tipologia corretta) ad ogni parametro del template.\\\'E possibile evitare la sintassi esplicita lasciando al compilatore il compito di dedurre il tipo partendo da quelli passati alla funzione. \\ Ad esempio: \\ \\ \texttt{char c1, char c2; \\ int m = max(c1, c2);} \\ \\ Si noti che il tipo di \texttt{m} (\texttt{int}) non influisce sul processo di deduzione. \\ Alcune volte il processo di deduzione potrebbe fallire a causa di ambiguit\'a.\\ \\Ad esempio: \\ \\ \texttt{double d, int i; \\ int m = max(d, i); \textcolor{grigio}{// Errore: \'e ambiguo. }\\ int m = max<int>(d, i); \textcolor{grigio}{// Dichiarazione esplicita.}} \\
+\end{itemize}
+\'E opportuno sottolineare la differenza tra template di funzione e funzione. \\In particolare, bisogna capire che un template di funzione NON \'e una funzione; va visto pi\'u come un generatore di funzioni.\\\'E l'istanza del template, invece, che va a rappresentare la funzione vera e propria.\\ Vediamo ora un esempio completo di utilizzo di template di funzione in C++. \\ \\
+\texttt{template <typename T>\\class GenericCalc \{ \\ \\ \tab public: \\ \tab \tab static T sum(T arg1, T arg2) \{ \\ \tab \tab \tab return arg1 + arg2; \\ \tab \tab \} \\ \\ \tab \tab static T sub(T arg1, T arg2) \{ \\ \tab \tab \tab return arg1 - arg2; \\ \tab \tab \} \\ \\ \tab \tab static T div(T arg1, T arg2) \{ \\ \tab \tab \tab return arg1 / arg2; \\ \tab \tab \} \\ \\ \tab \tab static T mul(T arg1, T arg2) \{ \\ \tab \tab \tab return arg1 * arg2; \\ \tab \tab \}; \\ \} \\ \\ \\ int main() \{ \\ \\ \tab int i1 = 2; \\ \tab int i2 = 6; \\ \tab int isum = GenericCalc<int>::sum(i1, i2); \\ \tab std::cout << i1 << " + " << i2 << " = " << isum;\\ \\ \tab float f1 = 2.6f; \\ \tab float f2 = 6.8f; \\ \tab float fsum = GenericCalc<float>::sum(f1, f2); \\ \tab std::cout << f1 << " + " << f2 << " = " <<fsum; \\ \\ \tab return 0; \\ \} } \\ \\
+\begin{itemize}
+\item \textbf{\textcolor{blu}{Specializzazione esplicita}}\\ Pu\'o capitare che la definizione del template non sia adeguata a tutti i casi di interesse. Il codice potrebbe infatti restituire un risultato ritenuto sbagliato in base ai parametri ricevuti. \\ Il template che abbiamo visto \texttt{max}, ad esempio, se istanziato con un tipo \texttt{const char*} restituirebbe come risultato il massimo dei due puntatori passati, quando invece molto probabilmente l'utente voleva compiere un confronto lessicografico tra due stringhe tipo C.\\Per questo \'e possibile fornire una definizione \textbf{specializzata} per gli argomenti sensibili. \\ \\
+\texttt{\textcolor{grigio}{// Specializzazione esplicita per T = const char* del template.} \\ template<>\\const char* max<const char*>(const char* a, const char* b) \{ \\ \tab return strcmp(a, b) > 0; \\ \}} \\ \\ La lista vuota dei parametri (\texttt{<>}) indica che si tratta di una specializzazione totale. \\
+\item \textbf{\textcolor{blu}{Istanziazioni Esplicite}}\\Una definizione di istanziazione esplicita blucrea e dichiara un elemento (che pu\'o essere una classe, una funzione, ecc...) partendo da un modello (ovvero il template) senza per\'o utilizzarlo ancora.\\In C++ la definizione di istanziazione esplicita \'e preceduta dalla parola chiave \textbf{extern}.\\ \\
+\texttt{extern template float max(float a, float b); } \\ \\In questo modo si informa il compilatore che, quando verr\'a usata quell'istanza del template, NON dovr\'a produrre la corrispondente definizione dell'istanza (evitando cos\'i la generazione del codice).\\Intuitivamente, \texttt{extern} indica che il codice corrispondente dovr\'a essere trovato dal linker esternamente a questa unit\'a di traduzione, cio\'e in un object file generato dalla compilazione di un'altra unit\'a di traduzione.\\ \\In pratica, la dichiarazione di istanziazione esplicita impedisce che vengano effettuate le istanziazioni implicite cos\'i da diminuire i tempi di compilazione e/o generare object file più piccoli. \\ \\ \\ \\ 
+\end{itemize}
+\begin{large}\textbf{\textcolor{blu}{Ordinamento Parziale}} \\ \\\end{large}
+Se denotiamo con \texttt{istanze(x)} l'insieme di tutte le possibili istanze del template \texttt{X}, allora si dice che il template di funzione \texttt{X} \'e pi\'u specifico del template di funzione \texttt{Y} se \texttt{istanze(x)} \'e sottoinsieme di \texttt{istanze(y)}.\\ \\
+I template dotati dello stesso nome e visibili nello stesso scope sono ordinati principalmente rispetto a questa relazione di specificit\'a.\\Nella risoluzione dell'overloading, le istanze dei template pi\'u specifici sono preferite a quelle dei template meno specifici.
+\\ \\ \\ \\ \\
+\begin{large}\textbf{\textcolor{blu}{Template di Classe}} \\ \\ \end{large}
+Un template di classe \'e un costrutto del C++ che permette di scrivere un modello (schema) parametrico per una classe.\\Sono applicabili quasi tutti i concetti visti per i template di funzione, ma con alcune importanti differenze.\\L'esempio di implementazione \'e il seguente.\\ \\ 
+\texttt{\textcolor{grigio}{// Dichiarazione pura di un template di classe. }\\ template <typename T> \\ class Stack; \\ \\\textcolor{grigio}{ // Definizione di un template di classe. } \\ template <typename T> \\ class Stack \{ \\ \tab public: \\ \tab \tab \textcolor{grigio}{ /* ... */ } \\ \tab \tab void push(const T\& t); \\ \tab \tab void pop(); \\ \tab \tab \textcolor{grigio}{ /* ... */  }\\ \} } \\ \\Per questo tipo di template \'e fondamentwale distinguere tra il nome del template (\texttt{Stack} in questo esempio) e il nome della specifica istanza (\texttt{Stack<std::string>}).\\Infatti per i template di classe NON si applica la deduzione dei parametri: la lista di argomenti va dichiarata obbligatoriamente. \\ \\
+\texttt{Stack <int> s1; \textcolor{grigio}{// Istanza implicita del tipo Stack<int>.}\\Stack s2 = s1; \textcolor{grigio}{// Errore: non viene dedotto il tipo T = int. }\\ auto s2 = s1; \textcolor{grigio}{ // Usando "auto" viene applicata la deduzione. }} \\ \\
+L'unico caso in cui \'e lecito usare il nome del template per indicare il nome della classe mediante istanziazione \'e all'interno dello scope del template di classe stesso. \\ \\
+\texttt{template <typename>\\ class Stack \{ \\ \tab \textcolor{grigio}{ /* ... */ }\\ \tab \textcolor{grigio}{ // Qui gli usi di Stack sono abbreviazioni (lecite) di Stack<T>.} \\ \tab Stack\& operator = (const Stack\&); \\ \tab \textcolor{grigio}{ /* ... */ } \\ \};} \\
+\begin{itemize}
+\item \textbf{\textcolor{blu}{Istanziazione on demand}}\\ Quando si istanzia implicitamente una classe templatica, vengono generate solo le funzionalit\'a necessarie per il funzionamento del codice che causa l'istanziazione.\\Questo vuol dire che la dichiarazione di una classe \texttt{Stack<int>} non comporta immediatamente l'istanziazione dei metodi \texttt{Stack<int>::push(const int\&)} e \texttt{Stack<int>::pop()}, ad esempio.\\Verrano invece istanziati nel momento in cui andranno a servire e verrano quindi utilizzati.\\ \\
+In questo modo posso usare un sottoinsieme delle funzionalit\'a della classe istanziandola con argomenti corretti anche se questi risulteranno non corretti per altre funzionalit\'a. \\ \\Tuttavia questo tipo di istanziazione ci obbliga, quando vengono scritti i test per la classe templatica, a fornire un insieme di test che copra tutte le funzionalit\'a di interesse. \\
+\item \textbf{\textcolor{blu}{Specializzazioni parziali}}\\ Si tratta di specializzazioni di template che sono applicabili non per una scelta specifica degli argomenti (come nel caso delle specializzazioni totali), ma per sottoinsiemi di tipi. \\ Una specializzazione parziale di un template (di classe), quindi, è ancora un template di classe, ma di applicabilità meno generale. \\Questo tipo di specializzazioni NON sono supportate dai template di funzioni. \\
+\end{itemize}
+\begin{large}\textbf{\textcolor{blu}{Compilazione dei Template}} \\ \\\end{large}
+Il processo di compilazione dei template richiede che lo stesso codice sia analizzato dal compilatore in (almeno) due contesti distinti:
+\begin{enumerate}
+\item Al momento della definizione del template.
+\item Al momento dell'istanziazione del template.
+\end{enumerate}
+Questo significa che, quando si scrive un programma, la definizione di un template deve esser disponibile in tutti i punti del programma dove se ne richiede l'istanziazione.\\Generalmente, questo viene effettuato includendo le definizioni (con le eventuali dichiarazioni delle funzioni membro annesse) prima di ogni loro uso nell'unit\'a di traduzione.\\ \\Nell'esercitazione sulla templatizzazione della classe \texttt{Stack}, ad esempio, era stato effettuato questo passaggio spostando le definizioni dei metodi della classe all'interno dell'header file \texttt{Stack.hh}.\\ \\ Inoltre questo processo di compilazione pu\'o richiedere, in alcune occasioni, di dover modificare il codice di implementazione dei template per fornire al compilatore le informazioni tali da evitare errori di compilazione.
+\\ \\ \\ \\ \\
+\begin{large}\textbf{\textcolor{blu}{Polimorfismo Statico}} \\ \\ \end{large}
+I template in C++ vengono utilizzati per realizzare il cosiddetto polimorfismo statico.\\
+Si parla di \textbf{polimorfismo} in quanto si scrive una sola versione del codice (template) che viene utilizzata per generare tante varianti a seconda dei casi (istanze).\\Diciamo \textbf{statico}, invece, poich\'e la scelta delle istanze da generare avviene a tempo di compilazione (e non a run-time).
+\\ \\La \textbf{programmazione generica} \'e una metodologia di programmazione basata sul polimorfismo statico (ovvero sui template). \\ Essa \'e ottimizzata quando un certo numero di template sono progettati in maniera coordinata, offrendo delle interfacce comuni e facilmente estendibili.\\ \\Per questo torna utile vedere la parte della libreria standard del C++ che fornisce gli strumenti di supporto ai template come contenitori e algoritmi generici per capire come questi interagiscono tra di loro.
+\\ \\ \\
+\begin{large}\textbf{\textcolor{blu}{Contenitori}} \\ \\ \end{large}
+In generale, un contenitore \'e una classe che ha lo scopo di contenere una collezione di oggetti (detti elementi del contenitore).\\
+Siccome viene richiesto che il tipo degli elementi sia arbitrario, i contenitori sono tipicamente realizzati mediante template di classe, che si differenziano in base all'organizzazione della collezione di oggetti e in base alle operazioni che si intendono supportare su tali collezioni.
+\\ \\ \\ \\ \\
+\begin{large}\textbf{\textcolor{blu}{Contenitori Sequenziali}} \\ \\ \end{large}
+Questo tipo di contenitori fornisce l'accesso ad una sequenza di elementi organizzati in base alla loro posizione.\\L'ordine di questi elementi NON \'e stabilito a priori, bens\'i viene dato dalle operazioni specifiche di inserimento e rimozione.\\I contenitori sequenziali standard sono:\\
+\begin{itemize}	
+\item \texttt{\textcolor{blu}{std::vector<T>}} \\ Sequenza di dimensione variabile (run-time) di elementi \texttt{T} memorizzati in modo contiguo.\\Fornisce l'accesso a qualunque elemento in tempo costante.\\Inserimenti e rimozioni sono efficienti se fatti in fondo alla sequenza, altrimenti \'e necessario effettuare un numero lineare di spostamenti per creare (o eliminare) lo spazio necessario per l'inserimento (o la rimozione). \\
+\item \texttt{\textcolor{blu}{std::deque<T>}}\\ Coda a doppia entrata (double-ended queue) nella quale inserimenti e rimozioni vengono effettuati in maniera efficiente sia in testa che in coda alla sequenza, sacrificando la memorizzazione contigua (memorizzazione a blocchi).\\Fornisce accesso a qualunque elemento in tempo costante. \\
+\item \texttt{\textcolor{blu}{std::list<T>}} \\ Sequenza di dimensione variabile (run-time) di \texttt{T} elementi memorizzati (in maniera non contigua) in una struttura a lista doppiamente concatenata.\\In questo modo si pu\'o consentire lo scorrimento della lista sia in avanti che all'indietro (\textbf{bidirezionale}).\\ \\Per accedere a un elemento occorre raggiungerlo seguendo i link della lista.\\ \\ Inserimento e rimozione sono effettuati sempre in tempo costante poich\'e non occorre spostare elementi. \\
+\item \texttt{\textcolor{blu}{std::forward\_list<T>}} \\ Analoga alla \texttt{std::list<T>} ma la concatenazione tra nodi \'e singola e viene di conseguenza consentito solo lo scorrimento in avanti (\textbf{forward}). \\
+\end{itemize}
+Ne esistono anche di altre tipologie che per\'o non rappresentano dei veri e propri contenitori, ma possiamo chiamarli \textbf{pseudo-contenitori}. \\
+\begin{itemize}
+\item \texttt{\textcolor{blu}{std::array<T, N>}} \\ Sequenza di \texttt{N} elementi di tipo \texttt{T} (dove \texttt{N} \'e un parametro valore, non un typename). \\ \\Corrisponde ad un array del linguaggio ma senza problematiche relative al type decay e che consente di sapere facilmente il numero di elementi.\\
+\item \texttt{\textcolor{blu}{std::string}} \\ Sequenza di caratteri di tipo char. \\ Si pu\'o istanziare il template anche con altri tipi di carattere utilizzando un alias diverso (ad esempio \texttt{std::u32string} per le stringhe di tipo char32).\\
+\item \texttt{\textcolor{blu}{std::bitset<N>}} \\ Sequenza di \texttt{N} bit, anche in questo caso \texttt{N} \'e un parametro valore e non un typename. \\
+\end{itemize}
+Ovviamente i contenitori sequenziali forniscono delle \textbf{operazioni} base come i costruttori, operatori per gestire la dimensione, operatori di inserimento e di rimozione, oltre ovviamente ad alcuni operatori specifici per il contenitore.
+\\ \\ \\ \\ \\
+\begin{large}\textbf{\textcolor{blu}{Iteratori a Supporto degli Algoritmi Generici}} \\ \\ \end{large}
+Un iteratore NON \'e un tipo di dato, \'e un concetto astratto rappresentato da un'entit\'a preposta alla scansione di un contenitore secondo le sue caratteristiche e le sue modalit\'a di accesso agli elementi, rispettandone i vincoli come la dimensione.\\ \\Un esempio tipico \'e dato dal puntatore ad un elemento contenuto in un array: usando una coppia di puntatori posso identificare una porzione dell'array specifica su cui voglio applicare l'algoritmo.\\Il primo puntatore punta al primo elemento della sequenza, il secondo alla posizione immediatamente successiva all'ultimo elemento della sequenza che voglio esaminare.\\ \\
+\texttt{int* cerca(int* first, int* last, int elem) \{ \\ \\ \tab for( ; first != last; ++first) \{ \\ \tab \tab if(*first == elem) \\ \tab \tab \tab return first; \\ \tab \} \\ \tab return last; \\ \} \\ \\ int main() \{ \\ \\ \tab int ai[200] = \{ 1, 2, 3, 4, ... \}; \\ \tab int* first = ai; \\ \tab int* last = ai + 2; // Cerco colo nei primi 3 elementi. \\ \tab int* ptr = cerca(first, last, 2); \\ \\ \tab if(ptr == last) \{std::cerr << "Non trovato";\}; \\ \tab else \{std::cerr << "Trovato";\}; \\ \} }
+\\ \\ \\ \\ \\
+\begin{large}\textbf{\textcolor{blu}{Algoritmi Generici}} \\ \\ \end{large}
+Abbiamo visto che le interfacce fornite dai contenitori sono molto simili, ma non identiche.\\ Queste interfacce, per\'o, NON comprendono molti servizi che l'utente si aspetta di poter utilizzare per una determinata collezione di elementi.\\ \\La libreria standard riesce a implementare questi servizi tramite gli \textbf{algoritmi generici}, che quindi non sono pensati per lavorare su un tipo di dato specifico, ma sono pensati per lavorare su concetti astratti applicabili a tutti i tipi di dato che ne soddisfano i requisiti.\\ \\
+Ad esempio, l'algoritmo di ricerca visto in precedenza funziona solo con puntatori a interi.\\Per renderlo pi\'u versatile occorre effettuare una templatizzazione della funzione \texttt{cerca} nel seguente modo: \\ \\
+\texttt{template <typename Iter, typename T> \\ \\ Iter cerca(Iter first, Iter last, T elem) \{ \\ \\ \tab for( ; first != last; ++first) \{ \\ \tab \tab if(*first == elem) \\ \tab \tab \tab return first; \\ \tab \tab return last; \\ \} }
+\\ \\ Bisogna quindi rispettare i vari requisiti per poter istanziare correttamente il tipo \texttt{Iter} nell'algoritmo generico.\\ \\Il tipo \texttt{Iter} deve:\\
+\begin{enumerate}
+\item Supportare la copia.
+\item Supportare il confronto binario per vedere se la sequenza \'e terminata o meno.
+\item Supportare il preincremento per avanzare di posizione nella sequenza.
+\item Consentire la dereferenziazione per poter leggere il valore "puntato".
+\item Il tipo dei valori puntati da \texttt{Iter} deve essere confrontabile con il tipo T usando l'operatore ==.\\
+\end{enumerate}
+Qualsiasi tipo di dato concreto se soddisfa questi requisiti pu\'o essere usato per istanziare l'algoritmo generico.
+\\ \\Questi algoritmi, quindi, non offrono un'applicabilit\'a specifica per un determinato contenitore, offrono un'applicabilit\'a generale: ogni contenitore viene quindi visto come una sequenza su cui gli algoritmi possono lavorare.
+\\ \\ \\ \\ \\
+\begin{large} \textbf{\textcolor{blu}{Contenitori Associativi}} \\ \\ \end{large}
+Contenitori che organizzano gli elementi al loro interno in modo da facilitarne la ricerca in base al valore di una \textbf{chiave}.\\Ci sono 8 tipi di contenitori associativi: \\
+\begin{enumerate}
+\item \texttt{std::set<Key, Cmp>}
+\item \texttt{std::multiset<Key, Cmp>}
+\item \texttt{std::map<Key, Mapped, Cmp>}
+\item \texttt{std::multimap<Key, Mapped, Cmp>}
+\item \texttt{std::unordered\_set<Key, Hash, Equal>}
+\item \texttt{std::unordered\_multiset<Key, Hash, Equal>}
+\item \texttt{std::unordered\_map<Key, Mapped, Hash, Equal>}
+\item \texttt{std::unordered\_multimap<Key, Mapped, Hash, Equal>} \\
+\end{enumerate}
+Se il tipo di elemento \'e formato solo dalla chiave (Key), allora abbiamo un contenitore di tipo \texttt{set} (insiemi). \\Altrimenti abbiamo i contenitori di tipo \texttt{map} (mappe), che associano valori di tipo Key a valori di tipo Mapped.\\Nel caso invece in cui sia possibile memorizzare pi\'u elementi con lo stesso valore per la chiave, abbiamo i contenitori \texttt{multi} (multi-insiemi).\\E infine, se l'organizzazione del contenitore \'e ottenuta mediante un criterio di ordinamento dell chiavi dato da una opportuna funzione di hash, abbiamo i contenitori \texttt{unordered}.
+\\ \\ \\ \\ \\
+\begin{large} \textbf{\textcolor{blu}{Adattatori}} \\ \\ \end{large}
+Nella libreria standard sono forniti anche degli \textbf{adattatori}, oltre ai contenitori.\\Questi forniscono ad un contenitore gi\'a esistente un'interfaccia specifica per usarlo come fosse un determinato tipo di dato.\\ \\Esempi di adattatori sono \texttt{std::stack<T, C>} e \texttt{std::queue<T, C>} che forniscono le strutture dati classiche pila (LIFO) e coda (FIFO).
+\\ \\ \\ \\ \\
+\begin{large} \textbf{\textcolor{blu}{Template Type Deduction}} \\ \\ \end{large}
+La \textbf{template type deuction} (ovvero la deduzione dei tipi per i parametri di template) \'e il processo messo in atto dal compilatore per semplificare l'istanziazione (esplicita o implicita che sia) e la specializzazione esplicita di template di funzione.\\ \\Questa forma di deduzione serve al programmatore per evitare di scrivere in modo ripetuto (che pu\'o anche essere soggetto a sviste) la lista degli argomenti da associare ai parametri del template di funzione.\\ \\Supponiamo quindi di avere la seguente dichiarazione di funzione templatica: \\ \\
+\texttt{template <typename TT>\\void f(PT param);} \\ \\
+Il compilatore dunque, di fronte alla chiamata di funzione \texttt{f(expr)} usa il tipo di \texttt{expr} per dedurre:
+\begin{enumerate}
+\item Un tipo specifico \texttt{tt} per \texttt{TT}.
+\item Un tipo specifico \texttt{pt} per \texttt{PT}.
+\end{enumerate}
+Questo causa l'istanziazione del template di funzione che porta alla seguente funzione:\\ \\
+\texttt{void f<tt>(pt param);}\\ \\
+Il processo di deduzione si distingue in tre casi che vediamo di seguito.\\
+\begin{itemize}
+\item \textbf{\textcolor{blu}{Universal reference}}\\Si ha universal reference quando abbiamo l'applicazione di \&\& al nome di un parametro typename del mio template di funzione.\\Ad esempio se TT \'e il parametro del typename:\\ \\
+\texttt{TT\&\& \textcolor{grigio}{// \'E un universal reference.}}\\
+\texttt{const TT\&\& \textcolor{grigio}{// NON \'e un universal reference (r-value reference).}}\\
+\texttt{std::vector<TT>\&\& \textcolor{grigio}{ // NON \'e un universal reference (r-value reference).}}\\ \\
+Il nome \textbf{universal} sta a indicare che, nonostante venga usata la sintassi per i riferimenti a r-value, pu\'o essere dedotto per \texttt{PT} un riferimento sia a r-value che a l-value a seconda del tipo \texttt{te} dell'espressione. \\ Assumiamo:\\ \\
+\texttt{int i = 0;\\ \\\textcolor{grigio}{// Esempio per rvalue.}\\f(5); \textcolor{grigio}{// te = int, deduco pt = int\&\&, tt = int. }\\ \\ \textcolor{grigio}{// Esempio per lvalue; }\\f(i); \textcolor{grigio}{// te = int\&, deduco pt = int\&, tt = int\&.}} \\
+\item \textbf{\textcolor{blu}{PT puntatore o riferimento}} \\ Si effettua un pattern matching tra il tipo \texttt{te} e \texttt{PT} ottenendo i tipi \texttt{tt} e \texttt{pt}.\\Ad esempio:\\ \\
+\texttt{template <typename TT> \\ void f(TT* param); \\ \\ f(\&i); \textcolor{grigio}{// te = int*, deduco pt = const int*, tt = int.}} \\ \\
+Per il caso dei riferimenti l'esempio \'e analogo: \\ \\
+\texttt{template <typename TT> \\ void f(TT* param); \\ \\ f(i); \textcolor{grigio}{// te = int\&, deduco pt = int\&, tt = int.}} \\
+\item \textbf{\textcolor{blu}{PT n\'e puntatore n\'e riferimento}}\\In questo caso, siccome si ha un passagio per valore, argomento e parametro sono due oggetti distinti.\\Di conseguenza, eventuali riferimenti e qualificazioni \texttt{const} dell'argomento NON si estendono al parametro.
+\\ \\ \\ \\ \\
+\end{itemize}
+\begin{large}\textbf{\textcolor{blu}{Auto Type Deduction}}\\ \\ \end{large}
+Nel linguaggio (C++11) \'e stata introdotta la possibilit\'a di definire le variabili utilizzando la parole chiave \textbf{auto}, senza dover specificare il tipo e lasciando di conseguenza al compilatore il compito di dedurlo a partire dall'espressione usata per inizializzare la variabile.\\ \\ Vediamo qualche esempio base. \\ \\
+\texttt{auto i = 5; \textcolor{grigio}{// i ha tipo int.} \\ const auto d = 5.3; \textcolor{grigio}{// d ha tipo const double.}\\ auto ii = i * 2.0 \textcolor{grigio}{// ii ha tipo double.} \\ const auto p = "Hello" \textcolor{grigio}{// p ha tipo const char* const;}} \\ \\ La auto type deduction segue (in larga misura) le stesse regole della template type deduction.\\In pratica, quando si osserva una definizione del tipo: \\ \\ \texttt{auto\& ri = ci;} \\ \\ In questo caso la parola chiave \texttt{auto} svolge il compito del parametro template \texttt{TT}, la sintassi \texttt{auto\&} corrisponde a \texttt{PT} e l'inizializzazione \texttt{ci} corrisponde all'espressione.
+\\ 
+\begin{large}\textbf{\textcolor{blu}{Iteratori}} \\ \\ \end{large}
+Come abbiamo visto, molti algoritmi generici della libreria standard lavorano sul concetto di sequenza.\\
+Il concetto di \textbf{iteratore} (che prende spunto dal puntatore) fornisce un modo efficace per rappresentare varie tipologie di sequenze indipendentemente dal tipo concreto usato per l'implementazione.\\ \\Gli iteratori si possono classificare in cinque categorie in base alle operazioni supportate e alle garanzie fornite all'utente. \\
+\begin{itemize}
+\item \textbf{\textcolor{blu}{Iteratori di input}} \\ Consentono di effettuare le seguenti operazioni: \\
+\begin{itemize}
+\item \texttt{++iter}\\Avanzamento di una posizione nella sequenza.\\
+\item \texttt{*iter}\\Accesso in sola lettura all'elemento corrente.\\
+\item \texttt{iter->m}\\Accesso in sola lettura quando l'elemento ha tipo classe e \texttt{m} \'e un membro della classe.\\
+\item \texttt{iter1 == iter2}\\Confronto per uguaglianza tra iteratori, usato tipicamente per verificare se \'e terminata la sequenza.\\
+\item \texttt{iter1 != iter2}\\Confronto per disuguaglianza.\\
+\end{itemize}
+Un esempio standard di iteratore di input \'e dato dagli iteratori definiti sugli stream di input (\texttt{std::istream}), attraverso i quali \'e possibile leggere i valori presenti sullo stream. \\Ad esempio:\\ \\
+\texttt{\#include <iterator> \\ \#include <iostream> \\ \\ int main() \{ \\ \\ \tab \textcolor{grigio}{// Uso di iteratori per leggere numeri double da std::cin.} \\ \tab std::istream\_iterator<double> i(std::cin); \textcolor{grigio}{// Inizio} \\ \tab \textcolor{grigio}{// della pseudo-sequenza.} \\ \\ \tab std::istream\_iterator<double> iend; \textcolor{grigio}{// Fine della\\ \tab // pseudo-sequenza. \\ \\ \tab // Scorro la sequenza stampando i double letti su std::cout.}\\ \tab for( ; i != iend; ++i) \{ \\ \tab \tab std::cout << *i << std::endl; \\ \} } \\ \\
+In questo caso l'iteratore che indica l'inizio della sequenza si costruisce passando l'input stream (\texttt{std::cin}) mentre quello che indica la fine si ottiene col costruttore di default.\\
+\\Quando si opera con un iteratore di input bisogna tener conto che l'operazione di incremento potrebbe invalidare altri iteratori definiti sulla sequenza.\\Infatti, l'operazione di avanzamento \textbf{consuma} l'input letto e se lo si volesse rileggere bisognerebbe averlo salvato opportunamente da qualche parte.\\
+\item \textbf{\textcolor{blu}{Iteratori di output}} \\ Permettono solamente di scrivere gli elementi di una sequenza; dopodich\'e bisogna incrementare l'iteratore per posizionarlo correttamente per la scrittura successiva.\\ \\Intuitivamente, le uniche operazioni consentite sono: \\
+\begin{itemize}
+\item \texttt{++iter}\\Avanzamento di una posizione nella sequenza.\\
+\item \texttt{*iter}\\Accesso in sola scrittura all'elemento corrente.\\
+\end{itemize}
+Non vengono forniti operatori di confronto tra iteratori poich\'e non \'e necessario farlo: si assume che ci sia sempre spazio nella sequenza per effettuare una scrittura.\\Sar\'a compito di chi lo usa fornire questa garanzia che, se violata, generer\'a un undefined behavior. \\
+\item \textbf{\textcolor{blu}{Iteratori Forward}} \\ Consentono di effettuare tutte le operazioni degli iteratori di input ma l'operazione di avanzamento (incremento) NON invalida eventuali altri iteratori che lavorano sulla sequenza.\\ Quesro vuol dire che sono iteratori riavvolgibili che permettono di scorrere pi\'u volte la stessa sequenza.\\Un esempio di iteratore forward \'e quello fornito dal contenitore \texttt{std::forward\_list}. \\ \\
+\texttt{\#include <forward\_list>\\ \#include <iostream> \\ \\ int main() \{ \\ \\ \tab std::forward\_list<int> lista = \{ 1, 2, 3, 4, 5 \}; \\ \\ \tab \textcolor{grigio}{// Modifica degli elementi della lista.}\\ \tab for(auto i = lista.begin(); i != lista.end(); ++i) \\ \tab \tab *i += 10; \\ \tab \textcolor{grigio}{// L'uso di "auto" in questo caso mi ha risparmiato dallo \\ \tab // scrivere il tipo dell'iteratore che \\ \tab // sarebbe std::forward\_list<int>::iterator. \\ \\ \tab // Stampa i valori 11, 12, 13, 14, 15. }\\ \tab for(auto i = lista.cbegin(); i != lista.cend(); ++i) \\ \tab \tab std::cout << *i << std::endl; \\ \tab \textcolor{grigio}{// auto = const\_iterator. }\\ \} } \\
+\item \textbf{\textcolor{blu}{Iteratori bidirezionali}}\\Implementano tutte le operazioni degli iteratori forward e in pi\'u consentono di spostarsi all'indietro sulla sequenza usando gli operatori di decremento \texttt{--iter} e \texttt{iter--}.\\Esempi di iteratori bidirezionali sono quelli del contenitore \texttt{std::list}. \\ \\
+\texttt{\#include <list>\\ \#include <iostream> \\ \\ int main() \{ \\ \\ \tab std::list<int> lista = \{ 1, 2, 3, 4, 5 \}; \\ \\ \tab \textcolor{grigio}{ // Modifica degli elementi della lista.} \\ \tab for(auto i = lista.begin(); i != lista.end(); ++i) \\ \tab \tab *i += 10; \\ \\ \tab \textcolor{grigio}{ // Stampa dei valori all'indietro. }\\ \tab for(auto i = lista.cbegin(); i != lista.cend(); ) \{ \\ \tab \tab --i; \textcolor{grigio}{// \'E necessario decrementare prima di \\ \tab \tab // effettuare l'operazione. \\} \tab \tab std::cout << *i << std::endl; \\ \tab \} \\ \tab \textcolor{grigio}{ // auto = const\_iterator. }\\ \} }\\
+\item \textbf{\textcolor{blu}{Iteratori random access}} \\ Consentono di effettuare tutte le operazioni degli iteratori bidirezionali aggiungendone anche altre (con \texttt{n} valore di tipo intero):\\
+\begin{itemize}
+\item \texttt{iter += n}\\Sposta iter di n posizioni (in avanti con n positivo, all'indietro con n negativo).\\
+\item \texttt{iter -= n}\\Analogo ma sposta nella direzione opposta.\\
+\item \texttt{iter + n}\\Calcola un iteratore spostato di n posizioni senza modificare iter.\\
+\item \texttt{iter - n}\\Analogo ma nella direzione opposta.\\
+\item \texttt{iter[n]}\\Equivale a *(iter + n).\\
+\item \texttt{iter1 - iter2}\\Calcola la distanza tra due iteratori della stessa sequenza.\\
+\item \texttt{iter1 < iter2}\\Restituisce vero se iter1 occore prima di iter2 nella sequenza. Ci sono analoghi per gli altri operatori di confronto.\\
+\\ \\ \\ \\
+\end{itemize}
+\end{itemize}
+\begin{large}\textbf{\textcolor{blu}{Template di Classe Iterator Traits}} \\ \\ \end{large}
+In linea di principio, ogni iteratore fornisce alcuni \textbf{alias} per dare nomi canonici ad alcuni tipi utili (come ad esempio \texttt{value\_type} ottenuto deferenziando l'iteratore).\\ \\Tuttavia non si pu\'o utilizzare la tecnica usata per i contenitori standard poich\'e tra gli iteratori ci sono anche tipi che non sono classi (come i puntatori) e che quindi non consentono di essere interrogati con la sintassi che usa l'operatore di scope: \\ \\ \texttt{Iter::value\_type} \\ \\
+Usando il template di classe \textbf{iterator traits} (\texttt{std::iterator\_traits}) possiamo scavalcare questo problema e interrogare direttamente il tipo iteratore: si interroga la classe traits ottenuta istanziando il template con quel tipo iteratore.\\Ad esempio se vogliamo conoscere il value type di \texttt{Iter} scriviamo: \\ \\
+\texttt{std::iterator\_traits<Iter>::value\_type} \\ \\Questo template di classe \'e solo uno degli esempi di uso di classi traits che hanno il compito di fornire informazioni (traits, ovvero le caratteristiche) su altri tipi di dato.
+\\ \\ \\ \\ \\
+\begin{large} \textbf{\textcolor{blu}{Callable}}\\ \\ \end{large}
+Molti degli algoritmi generici resi diponibili dalla libreria standard si presentano in due diverse versioni, ad esempio:\\
+\begin{enumerate}
+\item \texttt{template <typename FwdIter>\\FdwIter adjacent\_find(FwdIter first, FwdIter last);}\\ \\In questa versione il predicato binario per il controllo di equivalenza che viene usato \'e \texttt{operator==}.\\ \\Diverse istanze del template possono usare definizioni diverse (overloading) dell'operatore, per\'o il nome della funzione di equivalenza rimane fissato.\\
+\item \texttt{template <typename FwdIter, typename BinPred>\\FdwIter adjacent\_find(FwdIter first, FwdIter last, BinPred pred);}\\ \\Questa versione \'e parametrizzata rispetto a una determinata \textbf{policy}.\\Consente quindi di utilizzare un qualunque tipo di dato fornito dall'utente a condizione che si comporti come predicato binario sugli elementi della sequenza. \\
+\end{enumerate}
+Ci chiediamo ora quali sono i tipi di dato concreto che sono ammessi come parametro dalla funzione pred e che ci permettono di compilare correttamente il test.\\ \\ \texttt{if(pred(*first, *next)) \{...\} } \\ \\ Considerando un caso meno specifico, in queste situazioni ci servir\'a sapere quali tipi di dato \texttt{Test} possono essere utilizzati (ai proprio valori \texttt{test}) come nomi di funzione in una chiamata. \\ \\ \texttt{test(arg1, ..., argN)} \\ \\ L'insieme di questi tipi di dato forma il concetto di \textbf{callable}:
+\begin{enumerate}
+\item Puntatori a funzione.
+\item Oggetti funzione
+\item Espressioni lambda (dal C++11).
+\\ \\ \\ \\ 
+\end{enumerate}
+\begin{large} \textbf{\textcolor{blu}{Puntatori a Funzione}} \\ \\ \end{large}
+Negli esempi concreti visti finora, i parametri collable sono sempre stati istanziati usando un opportuno puntatore a funzione. \\Ad esempio: \\ \\
+\texttt{bool pari(int i);} \\ \\
+Per instanziare il predicato unario (in questo caso) della \texttt{std::find\_if}, il parametro typename \texttt{UnaryPred} viene legato al tipo concreto \texttt{bool (*)(int)} che non \'e altro che un puntatore a una funzione che prende come argomento un intero per valore e restituisce un booleano.
+\\ \\ \\ \\ \\
+\begin{large} \textbf{\textcolor{blu}{Oggetti Funzione}} \\ \\ \end{large}
+Oltre alle funzioni vere e proprie, vi sono altri tipi di dato i cui valori possono essere invocati come le funzioni rispettando cos\'i i requisiti del concetto collable.\\In particolare, una classe che fornisce una definizione del metodo \texttt{operator()} consente ai suoi oggetti di essere utilizzati al posto delle vere funzioni nella sintassi della chiamata. \\Vediamo un esempio. \\ \\
+\texttt{struct Pari \{ \\ \tab bool opeartor()(int i) const \{ \\ \tab \tab return i \% 2 == 0; \\ \tab \} \\ \}; \\ \\ int foo() \{ \\ \tab Pari p; \\ \tab if(p(345)) \{...\} \\ \tab ... \\ \} }\\
+ \\ L'oggetto \texttt{p} (di tipo struct \texttt{Pari}) in s\'e NON \'e una funziona ma, essendo fornito di un metodo \texttt{operator{}} pu\'o essere invocato come se la fosse.\\ \\Gli oggetti funzione, da un punto di vista tecnico, vengono utilizzati per ottenere vantaggi in termini di efficienza rispetto alle normali funzioni; in particolare forniscono al compilatore pi\'u opportunit\'a per ottimizzare il codice.\\
+\\Vediamo un esempio specifico: si consideri un programma che lavora su vettori di interi e istanzia pi\'u volte la funzione generica \texttt{std::find\_if} per effettuare ricerche nel vettore usando criteri di ricerca diversi (predicati unari).\\Prendiamo ora i seguenti predicati unari espressi mediante funzione:\\ \\
+\texttt{bool pari(int i);\\bool positivo(int i);\\bool numero\_primo(int i);} \\ 
+\\ Tutte queste tre funzioni prendono come argomento un intero e restituiscono un booleano, di conseguenza quando si istanzia l'algoritmo \texttt{std::find\_if} sul vettore si ottiene sempre la stessa istanza del template di funzione:\\ \\
+\texttt{\textcolor{grigio}{// Per comodit\'a usiamo i seguenti alias di tipo. }\\ using Iter = std::vector<int>::iterator \\ using Ptr = bool (*)(int); \\ \\ \textcolor{grigio}{// Quindi la specifica istanza ottenuta sar\'a questa. }\\ Iter std::find\_if<Iter, Ptr>(Iter first, Iter last, Ptr pred);} \\ \\ Viene generato un codice unico che deve riconoscere e gestire opportunamente le tre possibili invocazioni.\\La chiamata al predicato \'e implementata come chiamata di funzione.\\ \\Se invece implementassimo i tre predicati mediante oggetti funzione (definendo quindi tre classi distinte), quando si istanzia l'algoritmo \texttt{std::find\_if} sul vettore si otterrano tre diverse istanze del template di funzione: \\ \\
+\texttt{Iter std::find\_if<Iter, Pari>(Iter first, Iter last, Pari pred);\\Iter std::find\_if<Iter, Positivo>(Iter first, Iter last, Positivo pred);\\Iter std::find\_if<Iter, Numero\_Primo>(Iter first, Iter last, Numero\_Primo pred);} \\ \\ Qui quando viene generato il codice per una delle istanze, il compilatore vede l'invocazione di uno solo dei tre metodi \texttt{operator()} e pu\'o quindi ottimizzare il codice per quella specifica invocazione.
+\\ \\ \\ \\ \\
+\begin{large}\textbf{\textcolor{blu}{Espressioni Lambda}} \\ \\ \end{large}
+Espressioni utilizzate come comoda sintassi abbreviata che definisce un oggetto funzione \textbf{anonimo} (nel senso che viene definito a fronte di un unico punto del codice che lo invoca) e immediatamente utilizzabile.\\ \\Vediamo subito un esempio di istanziazione di \texttt{std::find\_if} con una lambda expression che implementa il predicato \texttt{pari} su di un tipo \texttt{T}.\\ \\
+\texttt{void foo(const std::vector<long>\& v) \{ \\ \\ \tab auto iter = std::find\_if(v.begin(), v.end(),\\ \tab \detokenize{[]}(const long\& i) \{ return i\%2 == 0; \}); \\ \tab \textcolor{grigio}{// Utilizzo di Iter ...\\ }\}}\\ \\In questo caso l'espressione lambda \'e data dalla sintassi: \\ \\ \texttt{\detokenize{[]}(const long\& i) \{ return i\%2 == 0; \}} \\ \\ Dove abbiamo i seguenti elementi: \\
+\begin{enumerate}
+\item \texttt{\detokenize{[]}} - Capture list (lista delle catture).\\
+\item \texttt{(const long\& i)} - Lista dei parametri (opzionale).\\
+\item \texttt{\{ return i\%2 == 0; \}} - Corpo della funzione.\\
+\end{enumerate}
+Questo uso della lambda expression corrisponde intuitivamente alle seguenti operazioni:\\
+\begin{enumerate}
+\item Definizione di una classe anonima per oggetti funzione dotata di un nome univoco scelto dal sistema.
+\item Definizione (all'interno della classe) di un metodo \texttt{operator()} che ha parametri, corpo e tipo di ritorno specificati (o dedotti) dall'espressione lambda.
+\item Creazione di un oggetto funzione "anonimo", avente il tipo della classe anonima, da passare a \texttt{std::find\_if}.\\
+\end{enumerate}
+In pratica \'e come se avessimo scritto il seguente codice:\\ \\
+\texttt{struct Nome\_Univoco \{ \\ \tab bool operator()(const long\& i) const \{ return i\%2 == 0; \} \\ \};\\ \\auto iter = std::find\_if(v.begin(), v.end(), Nome\_Univoco());} \\ \\ La lista delle catture pu\'o essere usata quando l'espressione lambda deve accedere a variabili locali visibili nel punto in cui viene creata.\\Ad esempio: \\ \\ \texttt{void foo(const std::vector<long>\& v, lon soglia) \{ \\ \\ \tab auto iter = std::find\_if(v.begin(), v.end(),\\ \tab \detokenize{[soglia]}(const long\& i) \{ return i>soglia; \}); \\ \tab \textcolor{grigio}{ // Utilizzo di Iter ...\\ }\}} \\ \\ Si possono catturare pi\'u variabili utilizzando come separatore la virgola, e si possono catturare per valore (\texttt{\detokenize{[=soglia]}}, che \'e quella base sottointesa nell'esempio) oppure per riferimento (\texttt{\detokenize{[&soglia]}} utile per evitare copie costose).\\ 
+\\Il metodo \texttt{operator()} \'e qualificato \texttt{const} e di conseguenza le variabili catturate hanno accesso in sola lettura. Se si vuole consentire la modifica, bisogna aggiungere alla lambda il modificatore \textbf{mutable}. \\ \\ \texttt{\detokenize{[soglia]}(const long\& i) mutable \{\\ \tab soglia = 100; \\ \tab return i>soglia; \\ \}}
+\end{document}
+
+ 

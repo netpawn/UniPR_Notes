@@ -1,0 +1,36 @@
+Constructor C1::C1()
+Constructor C3::C3() 
+-> causate da C3 c3 
+Constructor C1::C1() 
+-> causato da C1 c1 
+Start 
+Constructor C1::C1() 
+
+Constructor C1::C1()//sottooggetto classe base
+Constructor C1::C1()  
+Constructor C3::C3()//sottooggetto membro c3
+Constructor C2::C2()//sottooggetto membro c2
+123 -> C3 muore 
+Destructor C3::˜C3() 
+Destructor C1::˜C1() 
+Destructor C1::˜C1() 
+Destructor C1::˜C1() 
+... //dal try catch 
+end
+exit 0 - Destructors 
+Destructor C1::˜C1()
+Destructor C3::˜C3() 
+Destructor C1::˜C1()
+
+NOTE E REGOLE GENERALI : 
+
+*
+Prima si costruiscono gli oggetti della classe base
+Poi i dati membro, poi viene esegiuto il codice del costruttore.
+La distruzione avviene in modo inverso:
+Prima i dati membro poi gli oggetti classe base. 
+
+* 
+L'ordine di costruzione non deriva da quella esplicita, viene stabilito 
+dall'ordine con il quale noi dichiariamo i dati membro! Da private e sotto 
+al posto che D() : C1, c2, c3 

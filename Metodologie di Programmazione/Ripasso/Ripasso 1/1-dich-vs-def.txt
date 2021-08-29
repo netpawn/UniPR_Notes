@@ -1,0 +1,114 @@
+-- Dichiarazioni e definizioni
+
+Una dichiarazione è un costrutto del linguaggio che introduce
+(dichiara) un nome per una entità (tipo di dato, variabile, funzione,
+template di classe, template di funzione, ecc.).
+
+Una definizione è una dichiarazione che, oltre al nome, fornisce
+ulteriori elementi per caratterizzare l'entità (per esempio,
+la struttura interna di un tipo di dato, l'implementazione del
+corpo di una funzione, ecc.).
+
+Le dichiarazioni che NON sono anche definizioni vengono talvolta
+chiamate dichiarazioni "pure". Vediamo la differenza tra dichiarazioni
+pure e definizioni per varie tipologie di entità.
+
+1) Tipi di dato
+
+// dichiarazione pura del tipo S
+struct S;
+
+// definizione del tipo T
+struct T { int a; };
+
+Nel primo caso, non conosco la struttura del tipo S e, di conseguenza,
+non posso creare oggetti del tipo S (per esempio, il compilatore
+non saprebbe quanta memoria allocare per memorizzare un tale oggetto).
+Nel secondo caso, siccome T è definita, ne conosco la struttura
+e posso creare oggetti di tipo T.
+
+Ci si potrebbe chiedere quale sia l'utilità di avere una dichiarazione
+pura di tipo, visto che non si possono creare valori di quel tipo.
+In realtà sono utili quando occorre definire puntatori o riferimenti
+a valori del tipo S, senza dover conoscere il tipo S; si parla in
+questo caso di puntatori (o riferimenti) opachi:
+
+  struct S;
+  S* s_ptr; // un puntatore "opaco" a S
+
+Ci si potrebbe anche chiedere perché il linguaggio insista,
+nel caso di dichiarazioni pure, a richiedere che il programmatore
+dichiari se il nome introdotto è un tipo o un valore (cioè, perché
+occorre indicare la parola struct/class per dire che è un tipo).
+La risposta è che questa informazione è essenziale per poter
+fare il parsing del codice; consideriamo infatti una variante
+dell'esempio precedente:
+
+  nome1 * nome2
+
+Il compilatore che si trova di fronte a questo codice lo può
+interpretare in due modi completamente differenti:
+  a) nome2 è dichiarato essere un puntatore al tipo nome1
+  b) si richiede di applicare l'operatore binario * ai due
+     valori nome1 e nome2
+Se il compilatore vede che nome1 è un tipo, sceglie l'opzione a;
+se vede che è invece un valore, sceglie l'opzione b.
+
+--- Un caso speciale
+Nel caso del C++ 2011 (o successivo), è possibile anche fornire
+una dichiarazione pura per un tipo enumerazione, cosa che non era
+possibile fare con il C++ 2003:
+
+enum E : int;                // dichiarazione pura
+enum E : int { a, b, c, d }; // definizione
+---
+
+2) Variabili
+
+// dichiarazione pura di variabile (globale)
+extern int a;
+
+// definizione di variabile
+int b;
+int c = 1;
+extern int d = 2; // definizione, perché è inizializzata
+
+Nel caso della dichiarazione pura, il compilatore viene informato
+dell'esistenza di una variabile di nome "a" e di tipo int,
+ma la creazione di tale variabile verrà effettuata altrove
+(probabilmente in un'altra unità di traduzione).
+Nel caso delle definizioni, invece, il compilatore si occuperà
+di creare le variabili b, c, d e, se richiesto, di inizializzarle.
+
+3) Funzioni
+
+// dichiarazioni pure di funzioni
+void foo(int a);
+extern void foo(int a);
+
+// definizione di funzione
+void foo(int a) { std::cout << a; }
+
+La parola chiave extern è opzionale e, in pratica, è usata raramente:
+le definizioni hanno il corpo.
+
+4) Template (di classe e di funzione)
+
+// dichiarazione pura di template di classe
+template <typename T> struct S;
+
+// definizione di template di classe
+template <typename T>
+struct S {
+  T t;
+};
+
+// dichiarazione pura di template di funzione
+template <typename T>
+T add(T t1, T t2);
+
+// definizione di template di funzione
+template <typename T>
+T add(T t1, T t2) {
+  return t1 + t2;
+}

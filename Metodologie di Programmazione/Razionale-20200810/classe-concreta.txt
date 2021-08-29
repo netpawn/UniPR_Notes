@@ -1,0 +1,44 @@
+
+-- Progettazione di un tipo di dato concreto
+
+Consideriamo come esempio didattico la classe Razionale, perché:
+  - ha una interfaccia intuitiva;
+  - non presenta problematiche particolari di implementazione
+    (per esempio, non gestisce risorse direttamente);
+  - probabilmente, ne è già stata implementata una qualche variante
+    in precedenza.
+
+Cambiamo però il punto di vista: dando per scontato che si sia in grado
+di implementare le varie operazioni richieste, ci chiediamo cosa si
+potrebbe fare, dal punto di vista metodologico, per semplificare le
+varie fasi dello sviluppo del codice (attività che comprende sia la
+definizione dell'interfaccia della classe, sia la sua implementazione).
+
+Ci baseremo, a livello intuitivo, sul Test Driven Development (TDD).
+Il TDD (sviluppo guidato dai test) prevede che l'attività di progettazione
+e sviluppo del codice sia guidata dai test che, contrariamente a quello
+che ci si potrebbe aspettare, vengono scritti *prima* del codice che
+fornisce l'interfaccia e ne implementa le funzionalità.
+
+Verranno quindi sviluppate due distinte unità di traduzione,
+composte da tre file sorgente:
+
+ - testRazionale.cc: conterrà il codice di test della classe
+
+ - Razionale.hh: header file che contiene l'interfaccia della classe
+
+ - Razionale.cc: contiene l'implementazione della classe
+
+
+NOTA BENE: deve essere ben chiaro che l'obiettivo, dal punto di vista
+didattico, non è quello di *fornire* la giusta interfaccia
+(o implementazione) della classe Razionale, perché:
+ - in generale, l'adeguatezza di una interfaccia deve essere valutata
+   in uno specifico contesto di utilizzo;
+ - non ha molto senso "reinventare la ruota".
+Il nostro vero obiettivo è l'acquisizione di un metodo e di alcune
+tecniche che possono rendere più semplice l'attività di sviluppo
+del software: dovremmo quindi concentrarci sul *processo* di sviluppo
+del software e non sullo specifico *prodotto* software ottenuto.
+Per questi motivi, la fase di sviluppo verrà solo abbozzata, prendendo
+in considerazione solo alcune delle funzionalità richieste.

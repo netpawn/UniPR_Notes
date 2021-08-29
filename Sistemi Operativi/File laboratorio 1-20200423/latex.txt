@@ -1,0 +1,40 @@
+------- Istruzioni per generare la documentazione
+
+Per generare la descrizione delle attivita' svolte a lezione
+e le risposte ai vari quesiti, utilizzare il programma latex.
+Su linux dovrebbe essere sufficiente installare 
+apt-get install texlive texlive-latex-extra texlive-lang-italian
+
+
+Il file doc.tex contiene uno scheletro di relazione da modificare. 
+
+Sotto vpn (vpn.unipr.it per scaricare il client e accedere)
+il server didattica-linux.unipr.it (via ssh).
+
+TO DO:
+
+* Copiare/scaricare il file di esempio:
+doc.tex
+
+e portarli in una propria directory.
+
+* Fare qualche prova di modifica del file .tex e riassumere le soluzioni agli esercizi proposti a lezione
+
+* Per compilare il file doc.tex digitare
+
+pdflatex doc.tex
+
+Il programma genera alcuni files di supporto e il file doc.pdf
+che contiene la versione impaginata di doc.tex
+
+
+Per creare una versione html navigabile digitare 
+
+make html
+
+Ci si appoggia con il tool "make" per gestire la compilazione del
+sorgente.
+
+Viene creata una directory doc/ e al suo interno
+collocati vari files. Aprire index.html (con un browser)
+per osservare il risultato.

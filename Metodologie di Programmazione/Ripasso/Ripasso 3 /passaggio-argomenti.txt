@@ -1,0 +1,40 @@
+Nel C++ 2003, gli argomenti delle funzioni possono essere passati
+secondo due modalità:
+
+ - passaggio per valore (T):
+   si effettua un copia del valore dell'argomento nel
+   parametro della funzione;
+
+ - passaggio per riferimento a lvalue (const T& oppure T&):
+   il parametro della funzione è un riferimento che viene inizializzato
+   con l'argomento stesso, senza effettuare una copia.
+
+La linea guida, semplice, prevede di passare per copia solo gli
+oggetti piccoli, per i quali la copia stessa non è costosa,
+mentre gli oggetti potenzialmente grandi sono passati per riferimento
+(a costante); nel caso sia necessario modificare direttamente
+l'argomento in input, si opta per il passaggio a riferimento modificabile.
+
+Per il valore di ritorno, generalmente si opta per il ritorno per valore,
+perché non si possono restituire riferimenti a variabili che sono
+allocate automaticamente dalla funzione (il chiamante otterrebbe
+dei riferimenti dangling). Un caso in cui si possono restituire
+riferimenti (e quindi evitare copie costose) è quello in cui siamo
+sicuri che il riferimento è ad un oggetto il cui tempo di vita
+continuerà sicuramente anche dopo la chiamata di funzione.
+
+NOTA: a partire dal C++ 2011 sono stati introdotti i riferimenti a rvalue
+e, di conseguenza, la possibilità di passare un argomento per riferimento
+a rvalue. L'argomento (un po' tecnico) verrà affrontato quando
+parleremo della gestione delle risorse.
+
+NOTA: a volte, in maniera impropria, si parla di passaggio di un
+argomento "per puntatore". Tecnicamente, si tratta di un caso
+specifico del passaggio per valore (il valore del puntatore,
+ovvero un indirizzo). Questo modo di procedere è un eredità del
+linguggio C ed è spesso rimpiazzabile dal passaggio per riferimento.
+Un argomento di tipo puntatore continua ad avere senso quando
+l'argomento è opzionale: in questo caso, passando il puntatore nullo
+si segnala alla funzione che quell'argomento non è di interesse per
+una determinata chiamata.
+

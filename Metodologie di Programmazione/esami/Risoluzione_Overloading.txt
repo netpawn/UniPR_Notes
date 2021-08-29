@@ -1,0 +1,253 @@
+////////////////////////////////////
+/// RISOLUZIONE DELL'OVERLOADING ///
+////////////////////////////////////
+
+
+
+//////////////////////////////////
+////////////2012_02_02////////////
+//////////////////////////////////
+
+Chiamata A: 
+Cand = [4] Util = [4] Best = [4]
+pb->print(std::cerr) pb è un oggetto puntatore di classe Base a cui viene
+passato per riferimento il valore di un oggetto derived. La funzione 4 prende
+in input un valore per riferimento. Essento pb un oggetto base e non derived
+allora la funzione 7 non è visibile. 
+
+Chiamata B: 
+Cand = [4,7] Util = [4,7] Best = [ambigua]
+La chiamata è ambigua. Entrambe le funzioni vanno bene, anche se una è 
+classificata const e l'altra no. Non c'è modo di capire quale sia la Best
+
+Chiamata C: 
+Cand = [1,2] Util = [1,2] Best = [1]
+La migliore è la 1 e non è chiamata ambigua perché èer la f1 facciamo una 
+promozione da char a int + perfect match. Nella seconda invece abbiamo 
+due conversioni, da char a double e da double a int. 
+
+Chiamata D:
+Cand = [1,2,5] Util = [1,2,5] Best = [5]
+Stavolta possiamo accedere alla chiamata 5 visot che stiamo usando un oggetto
+d derived, e visto che la quinta ha 2 perfect match, vince. 
+
+Chiamata E: 
+Cand = [1,2] Util = [1,2] Best = [ambigua]
+Siccome le uniche due chiamate hanno int e doube e viceversa, abbiamo in ognuno
+dei casi una conversione da int a double. La chiamata è ambigua. 
+
+Chiamata F:
+Cand = [1,2,5] Util = [1,2,5] Best = [2]
+La F ha un double e un int. La due, oltre al const, ha due perfect match mentre 
+la 1 ha una conversione e la 5 anche se visibile ha una conversione. 
+
+Chiamata G:
+Cand = [3] Util = [3] Best = [3]
+L'unica funzione visibile è quella utilizzabile ed essendola, è anche la 
+migiore 
+
+Chiamata H:
+Cand = [3,6] Util = [3,6] Best = [ambigua]
+La chiamata è ambigua. Solo perché ci sono i qualificatori const non vuol dire
+che la risoluzione dell'overloading riesce a capire quale funzione chiamare
+
+
+
+
+
+
+//////////////////////////////////
+////////////2016_06_14////////////
+//////////////////////////////////
+
+
+Chiamata A:
+Cand = [1,2] Util = [1] Best = [1]
+
+Chiamata B:
+Cand = [10] Util = [10] Best = [10]
+
+Chiamata C:
+Cand = [5,6,10] Util = [6] Best = [6]
+ADL -> chiamando una funzione e passando c (tipo def utente) come paramentro 
+il namespace N che contiene il tipo si apre automaticamente. 
+
+Chiamata D: 
+Cand = [5,6] Util = [5] Best = [5]
+
+Chiamata E: 
+Cand = [/] Util = [/] Best = [/]
+
+Chiamata F: 
+Cand = [7,8] Util = [7,8] Best = [8]
+
+Chiamata G: 
+Cand = [7,8] Util = [7,8] Best = [7]
+
+Chiamata H:
+Cand = [9] Util = [9] Best = [9]
+ADL
+
+Chiamata I:
+Cand = [11,12] Util = [11] Best = [11]
+
+Chiamata J:
+Cand = [3,4] Util = [/] Best = [/]
+ADL
+
+
+
+
+
+//////////////////////////////////
+////////////2005_09_20////////////
+//////////////////////////////////
+
+
+Chiamata A:
+Cand = [1,2,3] Util = [1] Best = [1]
+
+Chiamata B:
+Cand = [1,2,3] Util = [2,3] Best = [AMBIGUA]
+
+Chiamata C:
+Cand = [1,2,3] Util = [1] Best = [1]
+
+Chiamata D:
+Cand = [4,5] Util = [4,5] Best = [4]
+
+Chiamata E:
+Cand = [4,5] Util = [4,5] Best = [5]
+
+Chiamata F:
+Cand = [4,5] Util = [] Best = []
+
+Chiamata G:
+Cand = [4,5] Util = [1] Best = [1]
+
+Chiamata H:
+Cand = [6,7] Util = [7] Best = [7]
+
+Chiamata I:
+Cand = [6,7] Util = [6] Best = [6]
+
+
+
+
+//////////////////////////////////
+////////////2005_02_22////////////
+//////////////////////////////////
+
+
+Chiamata A:
+Cand = [1,2,3,4,5,6] Util = [2] Best = [2]
+I template sono candidati perché anche se non sono funzioni sono schemi di 
+funzione. Li usiamo per ottenere una candidata. 1 non è utilizzabile perché
+non posso ocnvertire char in char*. Le altre richiedono 2 parametri. 
+Ricaviamo void f<char>(char); dalla funzione 2.
+
+Chiamata B:
+Cand = [1,2,3,4,5,6] Util = [1,2] Best = []
+Sembrerebbe una chiamata ambigua, ma fra funzione e template scegliamo la funzione
+
+Chiamata C:
+Cand = [1,2] Util = [2] Best = [2]
+
+Chiamata D:
+Cand = [3,4,5,6] Util = [3,4] Best = [3]
+
+Chiamata E:
+Cand = [3,4,5,6] Util = [3,4] Best = [4]
+
+Chiamata F:
+Cand = [3,4,5,6] Util = [4,5] Best = [5]
+
+Chiamata G:
+Cand = [3,4,5,6] Util = [3,4] Best = [4]
+
+Chiamata H:
+Cand = [3,4,5,6] Util = [5,6] Best = [6]
+
+Chiamata I:
+Cand = [7,8] Util = [7] Best = [7]
+
+Chiamata J:
+Cand = [7,8] Util = [8] Best = [8]
+
+Chiamata K:
+Cand = [7,8] Util = [7] Best = [7]
+
+Chiamata L:
+Cand = [7,8] Util = [7,8] Best = [AMBIGUA]
+
+
+
+
+//////////////////////////////////
+////////////2005_02_01////////////
+//////////////////////////////////
+
+Chiamata A:
+Cand = [1,2] Util = [1,2] Best = [2]
+
+Chiamata B:
+Cand = [5] Util = [5] Best = [5]
+NO ADL 
+
+Chiamata C:
+Cand = [3,6] Util = [3,6] Best = [AMBIGUA]
+ADL
+
+Chiamata D:
+Cand = [4,7] Util = [4,7] Best = [4]
+
+Chiamata E:
+Cand = [8] Util = [/] Best = [/]
+
+Chiamata F:
+Cand = [/] Util = [/] Best = [/]
+
+Chiamata G:
+Cand = [3] Util = [3] Best = [3]
+
+Chiamata H:
+Cand = [3,6] Util = [3,6] Best = [AMBIGUA]
+
+
+
+//////////////////////////////////
+////////////2010_06_14////////////
+//////////////////////////////////
+
+
+Chiamata A:
+Cand = [1,2] Util = [1] Best = [1]
+
+Chiamata B:
+Cand = [10] Util = [10] Best = [10]
+NO ADL 
+
+Chiamata C:
+Cand = [10,5,6] Util = [5,6,10] Best = [6]
+ADL 
+
+Chiamata D:
+Cand = [5,6] Util = [5,6] Best = [5]
+
+Chiamata E:
+Cand = [/] Util = [/] Best = [/]
+
+Chiamata F:
+Cand = [7,8] Util = [7,8] Best = [8]
+
+Chiamata G:
+Cand = [7,8] Util = [7,8] Best = [8]
+
+Chiamata H:
+Cand = [9] Util = [/] Best = [/]
+
+Chiamata I:
+Cand = [/] Util = [/] Best = [/]
+
+Chiamata J:
+Cand = [3,4] Util = [4] Best = [4]

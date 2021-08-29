@@ -1,0 +1,15 @@
+namespace DB {
+    class D {}; 
+} //namespace NB 
+
+namespace NA{
+    class C{}; 
+    void f(int i);
+    void f(double d, C c = C()); 
+    void g(C c = C(), NB::D d = NB::D());
+    void h(C C); 
+
+    void test1(){
+        f(2.0); //chiamata A 
+    }
+}//namespace nA 

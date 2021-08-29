@@ -1,0 +1,38 @@
+Pulp Fiction (1994)
+Kill Bill: Volume 1 (2003)
+Kill Bill: Volume 2 (2004)
+Bastardi Senza Gloria (2009)
+Attack the Block - Invasione Aliena (2011)
+Project X - Una Festa che Spacca (2012)
+La Città Incantata (2001)
+The Social Network (2010)
+Star Wars: Episodio III - La Vendetta dei Sith (2005)
+Star Wars: Episodio V - L'Impero Colpisce Ancora (1980)
+Rogue One: A Star Wars Story (2016)
+Le Follie dell'Imperatore (2000)
+Blade Runner (1982)
+Alien (1979)
+2001: Odissea nello Spazio (1968)
+Frankestein Junior (1974)
+Le Iene (1992)
+La Guerra dei Mondi (2005)
+The Day After Tomorrow (2004)
+
+------------------------------------
+
+Nome (anno)				Icona
+Regista
+
+Voto: viene attribuito in stelle è il riassunto delle votazioni negli altri campi. Si possono dare anche le mezze stelle, il minimo è mezza stella il massimo cinque.
+
+Sceneggiatura: valutazione alla trama generale del film attribuita in decimi (da 0 a 10). Si possono dare mezzi voti (ad esempio 7.5).
+
+Colonna Sonora: voto alle musiche del film. Stesso metodo di votazione della sceneggiatura.
+
+Recitazione: voto alle performance degli attori sempre con lo stesso metodo delle categorie precedenti.
+
+Montaggio: voto per tutto ciò che concerne effetti speciali, luci, computer grafica ecc... Solito metodo di votazione.
+
+Pro: annotazioni facoltative sui pro del film.
+
+Contro: annotazioni facoltative sui contro del film.

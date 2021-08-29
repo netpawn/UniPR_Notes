@@ -1,0 +1,92 @@
+
+-- Progettazione di un tipo concreto (sommario)
+
+* Test Driven Design (a livello intuitivo, non in senso formale)
+
+Mettendosi nei panni dell'utilizzatore del tipo di dato, si scrive
+il codice di test delle singole funzionalità; l'attività di sviluppo
+dell'interfaccia e dell'implementazione del tipo viene quindi "guidata"
+dai test (facendosi anche aiutare dalle segnalazioni di errore fornite
+dal compilatore in senso lato).
+
+L'attività di test dinamico è essenziale per verificare che la classe
+che si sta implementando si comporta correttamente nei casi coperti dai
+test stessi. Chiaramente, occorre seguire un approccio sistematico che
+consenta di sottoporre a test tutti i metodi della classe e possibilimente
+su di un numero significativo di casi. Deve comunque essere chiaro che solo
+in casi rari è possibile fare test esaustivi (e quindi conclusivi):
+quasi sempre, l'attività di test consente solo di mostrare errori
+presenti nel codice, ma non è in grado di dimostrarne l'assenza.
+
+
+* Invariante di classe
+
+Proprietà che deve essere soddisfatta dalla rappresentazione scelta
+per il tipo di dato: quando possibile, è utile codificarne il
+controllo in un metodo della classe (che noi abbiamo chiamato check_inv)
+e verificarne la validità mediante le asserzioni.
+
+NOTA BENE: si dice invariante perché "non varia", cioè dovrebbe essere
+"sempre" soddisfatta; le virgolette stanno però ad indicare che
+l'invariante può essere violata temporaneamente, durante l'esecuzione
+di un metodo della classe.
+Per esempio:
+
+  Razionale& operator+=(const Razionale& y) {
+    Razionale& x = *this;
+    assert(x.check_inv());
+    assert(y.check_inv());
+    x.num_ = (x.num_ * y.den_ + y.num_ * x.den_);
+    // qui l'invariante NON è verificata
+    x.den_ *= y.den_;
+    // qui l'invariante NON è verificata
+    normalize();
+    // qui l'invariante è stata ristabilita
+    assert(x.check_inv());
+    return *this;
+  }
+
+Un oggetto che viola l'invariante di classe è ben formato.
+Lo sviluppatore deve garantire che le operazioni della classe rendano
+vera l'invariante quando vengono creati nuovi oggetti e che la mantegano
+valida quando oggetti già esistenti vengono modificati.
+
+Occorre però stare anche attenti a non fornire all'utente della classe
+la possibilità di "rompere" (magari inavvertitamente) la proprietà
+invariante. Per esempio, nella classe Razionale, quando abbiamo aggiunto
+i metodi pubblici:
+
+  const Int& num() const;
+  const Int& den() const;
+
+siamo stati attenti a fornire un accesso *in sola lettura* alla
+rappresentazione interna della classe. Se avessimo fornito anche
+l'accesso in scrittura, per esempio aggiungendo i seguenti metodi
+pubblici (in overloading)
+
+  Int& num();
+  Int& den();
+
+avremmo dato all'utente la possibilità di compromettere la nostra
+invariante di classe. Ad esempio in questo modo:
+
+void rompi_invariante(Razionale& r) {
+  // qui r soddisfa l'invariante
+  r.den() = -1;
+  // qui r NON soddisfa l'invariante
+}
+
+L'attività di progettazione dell'interfaccia deve quindi valutare
+se l'aggiunta di un metodo possa dare un accesso incontrollato alla
+rappresentazione interna e, di conseguenza, mettere a rischio
+l'invariante.
+
+
+* Precondizioni e postcondizioni
+
+L'invariante di classe è parte delle precondizioni e postcondizioni dei
+metodi della classe. Queste formano il "contratto" che lo sviluppatore
+stabilisce con l'utilizzatore della classe. Si rimanda al corrispondente
+approfondimento sulla programmazione a contratto.
+
+

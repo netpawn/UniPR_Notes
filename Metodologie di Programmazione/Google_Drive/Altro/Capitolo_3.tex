@@ -1,0 +1,80 @@
+\documentclass{article}
+\newcommand\tab[1][1cm]{\hspace*{#1}}
+\newcommand\TILDE{$\sim$}
+\usepackage[dvipsnames]{xcolor}
+\definecolor{grigio}{gray}{0.65}
+\definecolor{blu}{rgb}{0.0, 0.2, 0.6}
+\usepackage{fancyhdr}
+
+\renewcommand{\labelitemi}{$\textcolor{blu}{\bullet}$}
+\renewcommand{\labelitemii}{${\bullet}$}
+
+\thispagestyle{fancy}
+\fancyhead[LE,RO]{Giovanni Battioni}
+\fancyhead[RE,LO]{Metodologie di Programmazione}
+\fancyfoot[CE,CO]{\thepage}
+
+\begin{document}
+\section*{\textcolor{blu}{3. Progettazione di un Tipo di Dato Concreto}} 
+L'obiettivo del capitolo \'e l'acquisizione di metodi e tecniche che rendano più semplice l'attivit\'a di sviluppo del software.\\ Ci concentriamo quindi sul \textbf{processo di sviluppo} del software e non sul prodotto che esso ottiene.
+\textcolor{grigio}{\section*{Prerequisiti \\ }} 
+\textcolor{grigio}{\begin{large}\textbf{Classi}\\ \end{large}
+\\Tramite la parola riservata \textbf{class} \'e possibile definire l'interfaccia di una classe composta dai metodi e proprietà che gli oggetti andranno a mettere a disposizione all'esterno. \\Decidiamo poi quali elementi saranno pubblici, quali privati e quali protetti.\\ Vediamo un esempio.\\ \\ \tt{class tipo \{ \\ \\ \tab public: \\ \tab \tab int var1; \\ \tab \tab int var2; \\ \tab \tab void funzione1(); \\ \tab private: \\ \tab \tab char var3; \\ \tab \tab void funzione2(); \\ \tab protected: \\ \tab \tab float var4; \\ \};}}
+\\ \\ 
+\textcolor{grigio}{\'E buona norma inserire la definizione di una classe (interfaccia) in un file di intestazione detto \textbf{header} con estensione \texttt{.h} e le implementazioni dei metodi della classe nel file cpp.}
+\\ \\ \\ \\ \\
+\textcolor{grigio}{\begin{large}\textbf{Costruttore}\\ \end{large}
+\\Il costruttore \'e una funzione (che deve avere lo stesso nome della classe a cui appartiene) che serve quando viene dichiarato l'oggetto. \\Si occupa di allocare la memoria e inizializzare l'oggetto, ad esempio. \\ \\ \\ \tt{class tipo \{ \\ \\ \tab int i; \\ \tab public: \\ \tab \tab tipo(); // Primo semplice costruttore \\ \}; \\ \\ tipo::tipo() \{ \\ \\ \tab i=0; \\ \};}} 
+\\ \\ \\ \\ \\
+\textcolor{grigio}{\begin{large}\textbf{Distruttore}\end{large}
+\\ \\Viene chiamato quano l'oggetto viene rilasciato dalla memoria. \\Prende il nome dalla classe preceduto da una tilde \TILDE .\\ Non ha nessun valore di ritorno e non prende parametri in quanto non \'e il programmatore a chiamarlo direttamente. \\ \\ \texttt{\TILDE tipo();} \\ \\Il distruttore libera la memoria che era occupata dall'oggetto.} 
+\\ \\ \\ \\ \\
+\textcolor{grigio}{\begin{large}\textbf{Costruttore di Copia}\end{large}
+\\ \\Costruttore utilizzato quando viene effettuata un'allocazione di memoria all'interno dell'oggetto. \\In questo caso \'e necessaria una copia dell'atto di allocazione in modo che i valori associati ai due oggetti siano effettivamente diversi.\\ In questo modo si risolve il problema di condivisione di memoria indesiderata. \\Vediamo un esempio.\\ \\ \tt{tipo::tipo(const tipo \&t) \{ \\ \tab i=t.i; // Copia effettiva del campo i \\ \} }} 
+\\ \\ \\ \\ \\ \\
+\textcolor{grigio}{\begin{large}\textbf{Overload di Operatori}\\ \\ \end{large}
+A livello implementativo, gli operatori sono a tutti gli effetti delle funzioni dove il nome \'e dato da \texttt{operator@} dove \texttt{@} \'e il simbolo dell'operatore (+, -, *, ecc).\\ \\Il linguaggio C++ offre la possibilit\'a di ridefinire gli operatori in modo che possano adattarsi al meglio ai tipi definiti dall'utente. \\ \\Il problema principale riguarda la visibilit\'a degli operatori sovraccaricati. Alcuni dovranno essere sovraccaricati solo come mebri di classe tramite l'uso di \texttt{this}, altri invece come funzioni esterne (ad esempio gli operatori \texttt{<<} e \texttt{>>}) e altri indifferentemente in uno dei due modi.} 
+\\ \\ \\ \\ \\
+\textcolor{grigio}{\begin{large}\textbf{Classi Derivate}\end{large}
+\\ \\Tramite \textbf{ereditariet\'a} \'e possibile creare una classe generale (\textbf{superclasse}) che definisce le caratteristiche comuni a tutti gli oggetti ad essa correlati. \\Questa classe pu\'o poi essere eridatata da una o pi\'u classi (\textbf{sottoclassi}) che possono aggiungere solo elementi specifici senza modificare la superclasse. \\ Il concetto si pu\'o poi iterare a pi\'u livelli. \\ \\Il tipo di accesso che la sottoclasse ha sugli elementi della superclasse sono definiti dagli \textbf{specificatori di accesso} (public, private, protected).}
+\\ \\ \\ \\ \\
+\begin{large} \textbf{\textcolor{blu}{TDD - Test Driven Development}} \\ \\ \end{large}
+L'attivit\'a di progettazione e sviluppo del codice viene guidata da dei test scritti prima del codice vero e proprio che implementa interfaccia e funzionalit\'a.\\Ci troveremo dunque, ad esempio, con tre distinti file sorgente del tipo:\\
+\begin{enumerate}
+	\item \texttt{testRazionale.cc}\\Contiene il codice del test che ci guider\'a allo sviluppo dell'interfaccia per la classe, in questo caso, Razionale. \\
+	\item \texttt{Razionale.hh}\\ \'E l'header che contiene l'interfaccia della classe. \\ \\
+	\item \texttt{Razionale.cc}\\Contiene l'effettiva implementazione della classe.\\
+\end{enumerate}
+L'attivit\'a di test serve per verificare che la classe che si sta implementando si comporti correttamente nei casi previsti dal test stesso.\\ Bisogna sottolineare che questa operazione va effettuata in modo sistematico, in quanto \'e molto raro effettuare test esaustivi.\\ Infatti, il test ci permette di individuare gli errori ma non \'e in grado di dimostrarne la totale assenza.
+\\ \\ \\ \\ \\
+\begin{large}\textbf{\textcolor{blu}{Invariante di Classe}} \\ \\ \end{large}
+Propriet\'a che deve essere soddisfatta in qualunque momento dalla rappresentazione scelta per il tipo di dato.\\ Questa invariante viene codificata all'interno di un metodo cos\'i che poi tramite le \textbf{asserzioni} possiamo verificare a nostro piacimento, in un punto qualsiasi del codice, che questa sia ancora verificata. \\ \\
+Bisogna quindi fare attenzione a non fornire all'utente che utilizza la classe l'occasione di rompere l'invariante.
+\\Questo pu\'o accadere inavvertitamente, ad esempio creando metodi pubblici che rompono l'ivariante e che vanno in overloading con metodi pubblici gi\'a esistenti e verificati. \\L'attivit\'a di progettazione prevede infatti che l'aggiunta di un nuovo metodo venga valutata per capire se da un accesso incontrollato alla rappresentazione interna e, di conseguenza, mette a rischio l'invariante.
+\\ \\ \\ \\ \\
+\begin{large}\textbf{\textcolor{blu}{Programmazione per Contratto}} \\ \\ \end{large}
+Prevede che ogni volta che un utente fa accesso a un oggetto di un tipo di dato deve rispettare il contratto scritto da chi ha sviluppato quel determinato oggetto.\\
+\\ Questo contratto stabilisce le \textbf{precondizioni} che l'utente deve soddisfare per poter invocare quella funzionalit\'a e quali sono le \textbf{postcondizioni} che l'implementatore deve invece garantire una volta usata la funzionalit\'a. \\ Spesso si rendono esplicite le condizioni sulle invarianti e si ottiene un'implicazione logica del tipo: \\ \\ \texttt{precondizioni AND invarianti => postcondizioni AND invarianti} \\ \\
+Ovviamente, se l'utente non soddisfa le precondizioni allora l'implicazione sar\'a sempre vera e nemmeno l'implementatore dovr\'a soddisfare le postcondizioni.\\Vediamo un esempio pratico.\\ \\
+\texttt{\textcolor{grigio}{// Esempio sull'opratore di divisione tra oggetti di tipo Razionale.} \\ \\Razionale operator/(const Razionale\& x, const Razionale\& y) \{ \\ \tab assert(x.check\_inv() \&\& y.check\_inv());\textcolor{grigio}{// Invarianti in ingresso.} \\ \tab assert(y != Razionale(0)); \textcolor{grigio}{// Precondizione.}\\ \\ \tab Razionale res = x; \\ \tab res /= y;\\ \\ \tab assert(res.check\_inv()); \textcolor{grigio}{// Invarianti in uscita e postcondizione.} \\ \tab return res; \\ \} }
+\\ \\ \\ \\ \\
+\begin{large}\textbf{\textcolor{blu}{Contratto Narrow}} \\ \\ \end{large}
+Detto anche contratto \textbf{stretto}, in questo caso non tutte le combinazioni degli argomenti di input sono lecite.\\ Nell'esempio di prima non era lecita la combinazione dove il secondo argomento y fosse uguale a zero, infatti si trattava di un contratto narrow. \\ \\In questo tipo di contratti l'implementatore si impegna a fornire la funzionalit\'a solo quando questa assume un senso (e quindi a valori forniti in input legittimi). \\Sar\'a dunque l'utilizzatore a decidere se tale legittimit\'a sar\'a verificata o meno.\\ \\In C++ questo tipo di contratto \'e molto frequente sia a livello di linguaggio stretto (ad esempio sta al programmatore verificare la validit\'a dell'indice di un array) che a livello di libreria standard.
+\\ \\ \\ \\ \\
+\begin{large}\textbf{\textcolor{blu}{Contratto Wide}} \\ \\ \end{large}
+In questo caso sta all'implementatore assicurarsi e gestire quelle situazioni in cui l'utilizzatore inserisce dei valori erronei (nell'esempio di prima, y = 0).\\ \\Si tratta quindi di spostare una parte del contratto dalle precondizioni alle postcondizioni. \\ \\Vediamo il contro-esempio. \\ \\
+\texttt{Razionale operator/(const Razionale\& x, const Razionale\& y) \{ \\ \tab assert(x.check\_inv() \&\& y.check\_inv()); \textcolor{grigio}{// Invarianti in ingresso. \\ \\ \tab // Controllo postcondizione: non esiste pi\'u l'asserzione che \\ \tab // richiede y diverso da zero. \\ \tab // Infatti non possiamo pi\'u, come implementatori,\\ \tab // pensare che l'utente ci abbia fornito i valori corretti. \\ \tab // In caso di contratto wide dobbiamo controllare se y \'e uguale \\  \tab // a zero e in caso comportarci di conseguenza.  }\\ \tab if(y == Razionale(0)) \\ \tab \tab throw DivByZero;\\ \\ \tab Razionale res = x; \\ \tab res /= y; \\ \\ \tab assert(res.check\_inv()); \textcolor{grigio}{// Invarianti in uscita}\\ \tab return res; \\ \}  } \\ \\
+In generale, i contratti wide sono pi\'u onerosi per l'implementatore in termini di efficienza e di righe di codice. 
+\\ \\ \\ \\ \\
+\begin{large}\textbf{\textcolor{blu}{Contratti in C++}} \\ \\ \end{large}
+Nello standard del C++ viene definito per ogni costrutto quale contratto deve rispettare, e di conseguenza l'eventuale comportamento (\textbf{behavior}) che l'implementazione deve assumere quando questo contratto viene infranto.\\
+Questi behavior vengono classificati nelle seguenti categorie: \\
+\begin{itemize}
+	\item \textbf{\textcolor{blu}{Specificato}}\\Il comportamento viene descritto dallo standard e l'implementazione \'e tenuta a seguire questa prescrizione.\\
+	\item \textbf{\textcolor{blu}{Implementation-defined}}\\Ogni implementazione pu\'o scegliere liberamente come sviluppare la funzionalit\'a ma ha l'obbligo di documentare la scelta fatta.
+	\item \textbf{\textcolor{blu}{Non specificato}}\\Comportamento che dipende dall'implementazione che per\'o, in questo caso, \textbf{NON} deve documentare la scelta fatta.\\
+	\item \textbf{\textcolor{blu}{Non definito}}\\Comportamento che si verifica quando l'utente viola una precondizione.\\ L'implementazione, quindi, non ha pi\'u nessun obbligo nei confronti dell'utilizzatore.\\ \\ Il risultato viene detto undefined-behavior (\textbf{UB}) e l'implementazione pu\'o comportarsi in qualsiasi modo.
+\end{itemize}
+
+\end{document}
+

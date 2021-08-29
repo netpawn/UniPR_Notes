@@ -1,0 +1,55 @@
+\documentclass{article}
+\newcommand\tab[1][1cm]{\hspace*{#1}}
+\newcommand\TILDE{$\sim$}
+\usepackage[dvipsnames]{xcolor}
+\definecolor{grigio}{gray}{0.62}
+\definecolor{blu}{rgb}{0.0, 0.2, 0.6}
+\usepackage{fancyhdr}
+
+\renewcommand{\labelitemii}{${\bullet}$}
+
+\thispagestyle{fancy}
+\fancyhead[LE,RO]{Giovanni Battioni}
+\fancyhead[RE,LO]{Metodologie di Programmazione}
+\fancyfoot[CE,CO]{\thepage}
+
+\begin{document}
+\section*{\textcolor{blu}{2. Overloading di Funzione}} 
+L'overloading \'e fondamentale in C++ in quanto rende il linguaggio pi\'u comodo e flessibile, inoltre fornisce il supporto principale per il polimorfismo.\\ In questo capitolo si vedranno i concetti base dell'overloading di funzione e i metodi per la sua risoluzione.
+\textcolor{grigio}{\section*{Prerequisiti\\}} 
+\textcolor{grigio}{\begin{large}\textbf{Conversioni Implicite}\end{large} \\ \\Il compilatore effettua una conversione implicita quando il tipo utilizzato di un dato non corrisponde a quello atteso. Viene dunque definita una sequenza di operazioni che consente di convertire da un tipo all'altro.\\Si parla di \textbf{promozione} o di \textbf{conversione} a seconda dell'operazione che si deve effettuare ad esempio:\\ \\ \texttt{long int a = 123; // Promozione\\int b = 3.4 // Conversione}\\ \\Sintenticamente la gerarchia \'e \texttt{double > float > long > int > char > bool}. \\La conversione potrebbe presentare delle perdite di informazione.}
+\\ \\ \\ \\ \\
+\begin{large}\textbf{\textcolor{blu}{Overloading}} \\ \\ \end{large}
+In C++ viene data la possibilit\'a di definire pi\'u funzioni che condividono lo stesso nome ma si differenziano per tipo e per numero e tipo di argomenti. Risulta utile per evitare di dare nomi diversi a funzioni che fanno sostanzialmente la stessa operazione ma su tipi diversi.\\ Ad esempio: \\
+\\ \texttt{float sqrt(float arg); \\ double sqrt(double arg); \\ long double sqrt(long double arg);} \\ \\
+Dal punto di vista dello sviluppatore dell'interfaccia, per\'o, occore prestare attenzione al fine di evitare un insieme di funzioni in overloading che possa risultare fuorviante all'utente.\\ \\Serve quindi conoscere a fondo i meccanismi per la cosiddetta \textbf{risoluzione} dell'overloading.
+\\ \\ \\
+\begin{large}\textbf{\textcolor{blu}{Risoluzione dell'Overloading}} \\ \\ \end{large}
+Questo \'e il processo seguito dal compilatore (senso stretto) atto a esaminare ogni chiamata di funzione e quindi di stabilire quale effettivamente debba essere invocata per quella chiamata. \\Segue tre passaggi questo processo: \\
+\begin{enumerate}
+\item \textbf{Individua i candidati}\\Una funzione viene detta \textbf{candidata} quando ha lo stesso nome della funzione che \'e stata chiamata ed \'e visibile nel punto in cui \'e stata chiamata. \\ \\ Il secondo punto \'e il pi\'u delicato, entra anche in gioco la regola \textbf{ADL} (Argument Dependent Lookup).\\ Essa stabilisce che se la chiamata NON \'e qualificata e vi sono argomenti aventi un tipo definito dall'utente che appartiene al namespace \texttt{N}, allora la ricerca delle funzioni candidate avverr\'a anche all'interno di \texttt{N}.\\ \\ Esempio: \\ \\ 
+\texttt{namespace N \{ \\ \\ \tab struct S \{\}; \\ \tab void foo(S s); \\ \tab void bar(int n); \\ \} \\ \\ int main() \{ \\ \\ \tab N::S s; \\ \tab foo(s); \textcolor{grigio}{// Si applica ADL perch\'e foo non \'e stata qualificata \tab// e s ha tipo struct S e rende la dichiarazione visibile \tab // N::foo(s). }\\ \\ \tab int i=0; \\ \tab bar(i) \textcolor{grigio}{// NON si applica ADL poich\'e l'argomento \'e di tipo \tab // int non definito dall'utente. Di conseguenza non si apre \tab // il namespace. }\\ \}} \\
+\item \textbf{Seleziona le funzioni utilizzabili}\\ Tra le candidate quelle \textbf{utilizzabili} sono quelle che hanno il numero di argomenti (nella chiamata) uguale a quello dei parametri (nella dichiarazione). \\ \\ In pi\'u serve che gli argomenti abbiano il tipo uguale al parametro corrispondente. \\ \\Nel caso della compatibilit\'a argomento-parametro bisogna tenere conto che non si parla solo di corrispondenze esatte, ma sono consentite anche le varie conversioni implicite.\\
+\item \textbf{Seleziona la migliore}\\Se N \'e il numero di funzioni utilizzabili quando N=0 si ha un errore di compilazione. \\Con N=1 ho gi\'a trovato la migliore.\\ \\Mentre se N\texttt{>}1, occore classificare le funzioni utilizzabili in base alla qualit\'a delle conversioni richieste. \\Se la classificazione determina un'unica vincitrice allora quella \'e la migliore, altrimenti si ha un errore di compilazione (\textbf{chiamata ambigua}).\\In generale una funzione vince su un'altra quando la sua conversione peggiore vince sulla conversione peggiore dell'altra.
+\\ \\ \\ \\ 
+\end{enumerate}
+\begin{large}\textbf{\textcolor{blu}{Classifica Conversioni}} \\ \\ \end{large}
+Le conversioni in C++ si possono suddividere in quattro categorie, le vediamo partendo dalla pi\'u alta alla pi\'u bassa in termini di rank, che ci servir\'a appunto nella terza fase della risoluzione dell'overloading. \\
+\begin{enumerate}
+\item \textbf{Corrispondenze esatte}\\Corrispondono a quelle conversioni implicite che preservano il valore dell'argomento. Si dividono in: \\
+\begin{itemize}
+\item \textit{Identi\'a}\\Dette anche match perfetti.\\ Effettivamente non \'e una conversione, si verifica quando tipo di partenza e tipo di destinazione coincidono.\\
+\item \textit{L-Value}\\Sono le conversioni che si verificano quando si passa da locazione (l-value) a valore (r-value) come succede, ad esempio, nel decadimento array-puntatore.\\
+\item \textit{Qualificazioni}\\Aggiungono il qualificatore \textbf{const}.\\ \\ \texttt{const int* \&i} \\
+\end{itemize}
+\item \textbf{Promozioni}\\Corrispondono alle conversioni implicite che preservano il valore dell'argomento e servono quando si vuole operare, ad esempio, tra un tipo \texttt{int} e un tipo pi\'u piccolo.\\ Quest'ultimo dev'essere \textbf{promosso} a \texttt{int} (o \texttt{unsigned int}) per poter effettuare l'operazione.\\Si dividono in:\\
+\begin{itemize}
+\item \textit{Intere}\\Da tipi interi piccoli (come \texttt{char}) a \texttt{int}.\\
+\item \textit{Floatin point}\\Da \texttt{float} a \texttt{double}.\\
+\item \textit{Costanti di enumerazione}\\Vengono convertite al tipo intero pi\'u piccolo che possa contenerle.\\
+\end{itemize}
+\item \textbf{Conversioni standard}\\Sono tutte quelle conversioni implicite che non fanno parte n\'e della prima n\'e della seconda categoria (ad esempio da \texttt{int} a \texttt{long}, da \texttt{char} a \texttt{double} e cos\'i via).\\
+\item \textbf{Definite dall'utente}\\Sono tutte quelle conversioni che vengono definite ad hoc dai programmatori.\\ \\Possono avere un uso \textbf{implicito} (ad esempio usando un costruttore unario che richiede un tipo di argomento differente da quello fornito) o uso \textbf{esplicito} tramite operatori di conversione.
+\end{enumerate}
+\end{document}
+

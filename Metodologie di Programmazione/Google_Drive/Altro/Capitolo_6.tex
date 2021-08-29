@@ -1,0 +1,85 @@
+\documentclass{article}
+\newcommand\tab[1][1cm]{\hspace*{#1}}
+\newcommand\TILDE{$\sim$}
+\usepackage[dvipsnames]{xcolor}
+\definecolor{grigio}{gray}{0.62}
+\definecolor{blu}{rgb}{0.0, 0.2, 0.6}
+\usepackage{fancyhdr}
+
+\renewcommand{\labelitemi}{$\textcolor{blu}{\bullet}$}
+
+\renewcommand{\labelitemii}{${\bullet}$}
+
+\usepackage{graphicx}
+\graphicspath{ {./} }
+
+\thispagestyle{fancy}
+\fancyhead[LE,RO]{Giovanni Battioni}
+\fancyhead[RE,LO]{Metodologie di Programmazione}
+\fancyfoot[CE,CO]{\thepage}
+
+\begin{document}
+\section*{\textcolor{blu}{6. Polimorfismo Dinamico}}
+In questo capitolo vedremo uno dei pilastri, assieme a incapsulamento e ereditariet\'a, della programmazione orientata agli oggetti.\\Con polimorfismo si intende la capacit\'a di fornire una singola interfaccia ad entit\'a di diversi tipi al fine di rendere il codice pi\'u versatile.
+\\ \\ \\ \\ \\
+\begin{large}\textbf{\textcolor{blu}{Relazione IS-A}} \\ \\ \end{large}
+Come gi\'a sappiamo la derivazione pubblica consente di effettuare, in maniera implicita, conversioni di tipo \textbf{up-cast}.\\Conversioni da un puntatore (o riferimento) per un oggetto della classe figlia verso un puntatore (o riferimento) per un oggetto della super classe.\\Vediamo quindi un banale esempio. \\ \\
+\texttt{\textcolor{grigio}{// Super classe.} \\ class Base \{ \\ \tab \textcolor{grigio}{ /* ... */ } \\ \}; \\ \\ \textcolor{grigio}{// Classe figlia.} \\ class Derived : public Base \{ \\ \tab \textcolor{grigio}{ /* ... */ } \\ \};} \\ \\ 
+La conversione concessa di cui parlavamo prima, in questo caso, sarebbe: \\ \\
+\texttt{Base* base\_ptr = new Derived;} \\ \\
+Questa conversione indica che \'e possibile utilizzare un oggetto \texttt{Derived} (tipo concreto) come se fosse un oggetto \texttt{Base} (tipo astratto), ignorando le eventuali caratteristiche specifiche di \texttt{Derived} e concentrandosi su quelle in comune con \texttt{Base}. \\ \\
+Si dice quindi che la classe \texttt{Derived} \'e in relazione \textbf{IS-A} con la classe \texttt{Base}.\\ \\Questo vuol dire che rappresenta una particolare concretizzazione della classe \texttt{Base} e pu\'o quindi essere usato come se fosse un oggetto di tipo \texttt{Base}.
+\\ \\ \\ \\ \\ \\
+\begin{large}\textbf{\textcolor{blu}{Metodi Virtuali}} \\ \\ \end{large}
+Sono metodi definiti in classi derivate che possono essere interrogati a tempo di esecuzione per ridirezionare dinamicamente la chiamata del metodo alla sua classe corretta.\\ \\Cerchiamo di capire questo concetto vedendo il seguente codice di esempio: \\ \\
+\texttt{class Stampante \{ \\ \\ \tab public: \\ \tab \tab void stampa(const Doc\& doc); \\ \}; \\ \\ class File\_Stampante : public Stampante \{ \\ \\ \tab public: \\ \tab \tab void stampa(const Doc\& doc); \\ \}; \\ \\ class Rete\_Stampante : public Printer \{ \\ \\ \tab public: \\ \tab \tab void stampa(const Doc\& doc); \\ \};} \\ \\Supponiamo ora che il codice dell'utente voglia stampare alcuni documenti utilizzando una stampante e, non essendo interessato a dettagli implementativi, utilizza l'astrazione di \texttt{Stampante} nel modo seguente: \\ \\
+\texttt{void stampa\_tutti(const std::vector<Doc>\& docs, Stampante* printer) \{ \\  \tab for(const auto\& doc : docs) \\ \tab \tab printer->stampa(doc); \\ \} } \\ \\ 
+In questo caso, il chiamante invoca la funzione \texttt{stampa\_tutti} passando un puntatore a una stampante concreta (\texttt{File\_Stampante} o \texttt{Rete\_Stampante}) sfruttando l'up-cast.\\ Il compilatore, quindi, eseguir\'a l'overloading effettuando la ricerca nella classe \texttt{Stampante} (senza cercare nelle classi derivate) e trover\'a solamente il merodo \texttt{Stampante::stampa}. \\ \\ L'utente, per\'o, intendeva invocare il metodo specifico della stampante concreta passata alla funzione.\\ \\Infatti, ogni classe concreta ridefinisce il metodo \texttt{stampa} a seconda delle necessit\'a della classe di appartenenza (ad esempio \texttt{Rete\_Stampante} potrebbe tenere traccia del numero di pagine stampate da vari utenti).\\ \\Serve un meccanismo che consenta di interrogare a run-time il puntatore allo scopo di capire il suo tipo dinamico e poterlo cos\'i ridirezionare alla classe corretta.\\ \\Questo meccanismo viene detto \textbf{RTTI} ovvero Run-Time Type Identification. \\Effettua dunque la risoluzione dell'overridng e pu\'o essere attivato solo se i metodi della classe sono \textbf{metodi virtuali}.\\ Una classe che contiene almeno un metodo virtuale viene detta \textbf{classe dinamica}.\\ \\
+\texttt{class Stampante \{ \\ \\ \tab public: \\ \tab \tab virtual void stampa(const Doc\& doc); \\ \};}
+\\ \\ \\ \\ \\
+\begin{large}\textbf{\textcolor{blu}{Metodi Virtuali Puri}} \\ \\ \end{large}
+Quando si definisce una classe base (come \texttt{Stampante}) spesso non si ha la possibilit\'a di fornire un'implementazione sensata dei metodi virtuali.\\Questo perch\'e la classe fornisce solo l'interfaccia del concetto astratto di una stampante.\\ \\Per questo \'e preferibile indicare il metodo virtuale come \textbf{puro} usando la sintassi "\texttt{= 0}" al termine della  dichiarazione. \\ \\ 
+\texttt{class Stampante \{ \\ \\ \tab public: \\ \tab \tab virtual void stampa(const Doc\& doc) = 0; \\ \};} \\ \\Una classe che contiene solo metodi virtuali puri viene detta \textbf{classe astratta}.\\Non si possono dichiarare oggetti che abbiano come tipo una classe astratta: possono essere solo usate come classi base per altre classi derivate.
+\\ \\ \\ \\ \\
+\begin{large}\textbf{\textcolor{blu}{Distruttori Classi Astratte}} \\ \\ \end{large}
+I distruttori per le classi astratte devono essere dichiarati \texttt{virtual} e non devono mai essere puri.\\ \\ \texttt{virtual \TILDE Classe\_Astratta() \{\}} \\ \\La ragione \'e di consentire la giusta distruzione degli oggetti delle classi concrete derivate da quella astratta.\\ \\Se il distruttore non fosse virtuale si verificherebbe memory leak.\\Ad esempio:\\ \\
+\texttt{class Astratta \{ \\ \\ \tab public: \\ \tab \tab virual void print() const = 0; \\ \tab \tab \TILDE Astratta() \{\} \textcolor{grigio}{// Distruttore errato: non \'e virtual.} \\ \}; \\ \\class Concreta : public Astratta \{ \\ \\ \tab std::vector<std::string> vs; \\ \\ \tab public: \\ \tab \tab Concreta() : vs(20, "stringa") \{\} \\ \\ \tab \tab void print() const override \{ \\  \tab \tab \tab for(const auto\& s : vs) \\ \tab \tab \tab \tab std::cout << s << std::endl; \\ \tab \tab \} \\ \tab \tab \textcolor{grigio}{// Il distruttore di default andrebbe bene: lo ridefiniamo \\ \tab \tab // solo per fargli stampare qualcosa e osservare quindi \\ \tab \tab // che non viene invocato.} \\ \\ \tab \tab \TILDE Concreta() \{ std::cout << "Distruzione" << std::endl; \} \\ \} \\ \\ int main() \{ \\ \\ \tab Astratta* a = new Concreta; \\ \tab a -> print(); \\ \\ \tab \textcolor{grigio}{// Memory Leak! non viene distrutto il vettore nella classe concreta.} \\ \tab delete a; \textcolor{grigio}{// Invoca il distuttore di Astratta che non \'e virtual.} \\ \}}
+\\
+\begin{large}\textbf{\textcolor{blu}{Risoluzione Overriding}} \\ \\ \end{large}
+Viene effettuata a tempo di esecuzione dal \textbf{RTS} (Run-Time Support) del linguaggio.\\Affinch\'e si attivi questo meccanismo occore che: \\
+\begin{enumerate}
+\item Il metodo invocato sia virtuale. \\
+\item Il metodo viene invocato tramite puntatore o riferimento. \\ Altrimenti non c'\'e distinzione tra il tipo statico e il tipo dinamico e si invoca il metodo della classe base. \\
+\item Almeno una delle classi della catena di derivazione che porta dal tipo statico al tipo dinamico ha gi\'a effettuato overriding. \\
+\item Il metodo NON deve essere invocato mediante qualificazione esplicita.\\ Questo causerebbe l'invocazione del metodo cos\'i come \'e stato definito nella classe usata per la qualificazione.
+\\ \\ \\ \\
+\end{enumerate}
+\begin{large}\textbf{\textcolor{blu}{Conversioni Esplicite in C++}} \\ \\ \end{large}
+C++ offre varie sintassi per effettuare il cast (conversione esplicita di tipo) di un'espressione allo scopo di ottenere un tipo di dato diverso.\\ \\
+Prima di vedere le varie tipologie e sintassi di cast, vediamo le motivazioni per cui diventa necessario effettuare una conversione esplicita: \\
+\begin{enumerate}
+\item Il cast implementa una conversione di tipo non consentita dalle regole del linguaggio.\\Il programmatore si prende la responsabilit\'a della correttezza della conversione.\\
+\item Analogo al caso precedente ma in questo caso viene usato un \texttt{dynamic\_cast} per controllare, a run-time, se la conversione richiesta \'e effettivamente consentita.\\ \\ \\
+\item Viene inserito nel programma a scopo di documentazione.\\Non \'e necessario dal punto di vista tecnico, ma migliora la leggibilit\'a del codice.\\
+\item Conversione forzata al tipo \texttt{void} che corrisponde a una richiesta di ignorare il valore dell'espressione.\\
+\end{enumerate}
+Descriviamo ora le diverse tipologie di cast. \\ \\
+\begin{itemize}
+\item \textbf{\textcolor{blu}{Static}}\\Calcola un nuovo valore ottenuto dalla conversione dell'espressione \texttt{expr} al tipo \texttt{T}. \\ \\ \texttt{static\_cast<T>(expr)}\\
+\item \textbf{\textcolor{blu}{Dynamic}}\\Funge da supporto per la RTTI.\\Vengono anche utilizzati per effetuare conversioni all'interno di una gerarchia di classi legate da ereditariet\'a.\\
+\item \textbf{\textcolor{blu}{Const}}\\Tipicamente utilizzato per rimuovere la qualificazione \texttt{const}.\\ Si applica ad un riferimento (o puntatore) ad un oggetto qualificato \texttt{const} (ovvero non modificabile) per ottenere un riferimento (o puntatore) ad un oggetto non qualificato (e quindi modificabile).\\ \\ \texttt{void promessa\_marinaio(const int\& ci) \{ \\ \\ \tab int\& i = const\_cast<int\&>(ci); \\ \tab ++i; \\ \}} \\ \\La funzione, in questo esempio, aveva promesso di non modificare l'argomento \texttt{ci}, ma tramite il cast elimina la qualificazione e modifica proprio l'argomento (non una copia).\\
+\item \textbf{\textcolor{blu}{Reinterpret}}\\Si usa nei seguenti casi: \\ \begin{enumerate} \item Da puntatore a intero (abbastanza grande da rappresentare il valore del puntatore). \\ \item Da intero a puntatore. \\ \item Da puntatore (o riferimento) a un altro tipo puntatore (o riferimento). \\ \end{enumerate}
+\item \textbf{\textcolor{blu}{Funzionale}}\\Usando le sintassi del tipo: \\ \\ \texttt{T(expr) \tab T()} \\ \\ Corrisponde semplicemente alla costruzione diretta di un oggetto di tipo T usando un costruttore (vuoto nel secondo caso).\\ \\Nel caso di un tipo built-in la forma \texttt{T()} produce la cosiddetta zero-initialization.\\
+\item \textbf{\textcolor{blu}{Stile C}}\\Hanno la seguente sintassi: \\ \\ \texttt{(T) expr} \\ \\ Il loro uso \'e considerato cattivo stile.\\Con questo tipo di cast \'e possibile simulare tutte le tipologie di cast viste finora ad eccezione dei \texttt{dynamic\_cast}.
+\\ \\ \\ \\
+\end{itemize}
+\begin{large}\textbf{\textcolor{blu}{I Principi S.O.L.I.D.}} \\ \\ \end{large}
+Con questo acronimo si identificano i cinque principi della progettazione object oriented.\\ \\Lo scopo \'e quello di fornire delle linee guida verso uno sviluppo che renda il codice pi\'u flessibile per facilitare manutenzione e estensione delle funzionalit\'a.\\ \\Si parla di principi e non regole poich\'e non sono strettamente obbligatori.\\Sta al programmatore capire quando e come usarli per trarre i benefici elencati in precedenza.\\
+\begin{itemize}
+\item \textbf{\textcolor{blu}{SRP - Single Responsabilty Principle}}\\ \'E un principio di validit\'a generale.\\Dice che ogni porzione di codice che progettiamo deve avere in carico una responsabilit\'a (deve essere pensata per svolgere un compito preciso).\\Ad esempio, una classe che deve manipolare pi\'u risorse (in exception safe) non dovrebbe prendersi la responsabilit\'a della gestione di acquisizione e rilascio di esse.\\
+\item \textbf{\textcolor{blu}{OCP - Open Closed Principle}}\\Il principio "aperto-chiuso" dice, appunto, che il codice deve essere \textbf{aperto} alle estensioni e \textbf{chiuso} alle modifiche.\\ \\In parole povere un software dovrebbe rendere facile l'aggiunta di nuove funzionalit\'a senza andare ad intaccare il codice gi\'a scritto. \\
+\item \textbf{\textcolor{blu}{LSP - Liskov Substitution Principle}}\\Ogni funzione che usa puntatori o riferimenti a classi base deve essere in grado di usare oggetti delle classi derivate senza saperlo.\\ \\Le classi di un sottotipo \texttt{S} devono soddisfare le aspettative degli utenti che accedono ad esse tramite puntatori.\\Siccome \texttt{S} dichiara una relazione IS-A rispetto a \texttt{T}, gli oggetti di \texttt{S} devono comportarsi come gli oggetti di tipo \texttt{T} (fornendo ovviamente anche i medesimi metodi).\\
+\item \textbf{\textcolor{blu}{ISP - Interface Segregation Principle}}\\Principio di separazione delle interfacce, dice che l'utente non deve essere forzato a dipendere da parti di un'interfaccia che non utilizza.\\ \\Questo significa che il progettista deve cercare, per quanto possibile, di separare tutte le interfacce che possono essere usate separatamente.\\ \\Questo porta diversi vantaggi come evitare la propagazione di errori oppure la possibilit\'a di modificare solo una piccola parte senza intaccare le altre.\\
+\item \textbf{\textcolor{blu}{DIP - Dependency Inversion Principle}}\\I moduli di alto livello non devono dipendere da quelli di basso livello: entrambi devono dipendere da astrazioni.\\Le astrazioni non devono dipendere dai dettagli; sono i dettagli che dipendono dalle astrazioni.\\ \\Questo principio opera quindi una classificazione sulle dipendenze tra moduli software (classi, funzioni, ecc...) stabilendo quali sono le varie dipendenze tra esse.
+\end{itemize}
+\end{document}

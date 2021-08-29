@@ -1,0 +1,21 @@
+inizializzo 1,2,3,4,5,6,7, 
+
+===1=== 
+B::f(int) 
+B::g(int) 
+B::f(int)  
+C::g(int) 
+===2===
+A::f(double)
+B::f(int) 
+C::g(int)
+===3=== 
+B::f(int)
+C::g(int)
+===4=== 
+distruttori -> 
+Destructor C::~C()
+Destructor B::~B()
+Destructor A::~A() 
+Destructor B::~B()
+Destructor A::~A() 

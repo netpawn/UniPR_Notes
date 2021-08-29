@@ -1,0 +1,37 @@
+/*
+Si forniscano il prototipo e l’implementazione della funzione generica count_if,
+che dati in ingresso una sequenza ed un predicato unario, restituisce il numero di elementi di 
+quella sequenza per i quali quel predicato `e soddisfatto.
+Utilizzando la funzione suddetta, scrivere un programma che legge dallo standard input una sequenza 
+di std::string e scrive sullo standard output il numero di stringhe lette aventi una lunghezza 
+maggiore di 10.
+*/
+
+template <typename Iter, typename Pred> 
+int count_if(Iter i1, Iter i2, Pred p){
+    int res= 0; 
+
+    while(i1 != i2){
+        if(p(*i1))
+        res++; 
+
+        ++i1
+    }
+    return res; 
+}
+
+int main(){
+
+
+    cons int dim = 10; 
+    std::string s1 = [dim];
+
+    for(int i=0; i<dim; i++){
+        std::cin >> s1 >> s2 >> s3;
+
+        if(count_if(s[i].begin(), s[i].end(), [](const std::string& s1) )) 
+    }
+
+    std::cout 
+
+}

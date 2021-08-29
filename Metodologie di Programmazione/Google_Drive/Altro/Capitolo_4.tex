@@ -1,0 +1,101 @@
+\documentclass{article}
+\newcommand\tab[1][1cm]{\hspace*{#1}}
+\newcommand\TILDE{$\sim$}
+\usepackage[dvipsnames]{xcolor}
+\definecolor{grigio}{gray}{0.62}
+\definecolor{blu}{rgb}{0.0, 0.2, 0.6}
+\usepackage{fancyhdr}
+
+\renewcommand{\labelitemi}{$\textcolor{blu}{\bullet}$}
+\renewcommand{\labelitemii}{${\bullet}$}
+
+\thispagestyle{fancy}
+\fancyhead[LE,RO]{Giovanni Battioni}
+\fancyhead[RE,LO]{Metodologie di Programmazione}
+\fancyfoot[CE,CO]{\thepage}
+
+\begin{document}
+\section*{\textcolor{blu}{4. Gestione Risorse e Exception Safety}} 
+Una problematica riguardante lo sviluppo del software \'e quella della gestione delle risorse.\\Bisogna infatti mirare ad un'ottima gestione delle risorse per ottenere dei vantaggi in termini di "peso" del software (memoria occupata, costi computazionali, ecc...).\\
+\\ In generale, si pu\'o ottenere una gestione corretta quando il programma segue un flusso di esecuzione previsto dallo sviluppatore.\\
+\\In questo capitolo vedremo dunque come ottimizare la gestione ma soprattutto come comportarci nel caso in cui si verifichino \textbf{eccezioni}, ovvero quando il software NON segue il flusso previsto.
+\textcolor{grigio}{\section*{Prerequisiti \\}} 
+\textcolor{grigio}{\begin{large}\textbf{Eccezioni in C++}\end{large}\\
+\\In C++ esiste un tipo di errori detti \textbf{errori di runtime} che non possono essere rilevati in fase di compilazione poich\'e si verificano solo durante la fase di esecuzioni in particolari circostanze.\\Sono errori pericolosi, se non opportunamente gestiti possono anche causare il crash dell'applicazione.
+\\Per questo C++ mette a disposizione alcuni meccanismi per gestire queste eccezioni.\\ \\In questo linguaggio \'e previsto l'uso del costrutto \textbf{try-catch} come meccanismo.
+\\ Nel blocco \texttt{try} si inseriscono le istruzioni cosiddette "a rischio". Invece \texttt{catch} introduce il blocco che contiene le istruzioni per un determinato tipo di errore. Ad esempio.\\ \\ \texttt{try \{ \\ \\ \tab // Istruzioni a rischio di errori di runtime. \\ \} \\ catch(tipoErrore1) \{ \\ \\ \tab // Istruzioni che gestiscono l'errore 1. \\ \} \\ catch(tipoErrore2) \{ \\ \\ \tab // Istruzioni che gestiscono l'errore 2. \\ \} \\ catch(...) \{ \\ \\ \tab // Istruzioni che gestiscono tutte le altre eccezioni. \\ \}}}
+\\ \\ \\ \\ \\
+\begin{large}\textbf{\textcolor{blu}{Gestione Risorse}}\\ \\ \end{large}
+L'interazione del software con le risorse deve seguire uno schema predefinito composto da 3 passi:\\
+\begin{enumerate}
+\item Acquisizione della risorsa.
+\item Utilizzo.
+\item Rilascio. \\
+\end{enumerate}
+In particolare, al termine del suo utilizzo la risorsa deve essere rilasciata. Se questo non si verifica si parla di \textbf{memory leak}, che in alcuni casi potrebbe portare all'esaurimento della memoria.\\
+\\Inoltre non \'e lecito utilizzare una risorsa dopo averla rilasciata (bisogna tornare alla fase di acquisizione), quando si tenter\'a di fare ci\'o si verificher\'a il cosiddeto \textbf{dangling pointer}.\\ \\Vediamo un esempio.\\
+\\ \texttt{void foo() \{ \\ \tab int* pi = new int(42); \textcolor{grigio}{// Acquisizione.} \\ \tab do\_the\_job(pi); \textcolor{grigio}{// Utilizzo (tramite funzione ausiliaria).} \\ \tab delete pi; \textcolor{grigio}{// Rilascio.} \\ \} }
+\\ \\ \\ \\ \\
+\begin{large} \textbf{\textcolor{blu}{Exception Safety}} \\ \\ \end{large}
+Come detto all'inizio, la gestione corretta delle risorse \'e semplice da ottenere quando il software segue il flusso di esecuzione previsto. \\Diventa dunque importante imparare a gestire tutte quelle situazioni in cui il software esce da questo flusso. \\In C++ vengono lanciate delle eccezioni che vengono catturate da un blocco \texttt{catch} che penser\'a a gestire poi la situazione specifica.\\Ovviamente \'e essenziale imparare a capire nel dettaglio cosa succede, in modo da poter sapere come e quali eccezioni gestire; questo \'e sostanzialmente il compito della exception safety.\\ 
+\\Ad esempio, il codice scritto nel paragrafo precedente, NON \'e exception safety. \\Infatti nel caso in cui la funzione \texttt{do\_the\_job} (o qualunque funzione invocata da questa) dovesse lanciare un'eccezione (e questa non venisse gestita internamente), il flusso di esecuzione NON seguire pi\'u il percorso previsto e di conseguenza NON andrebbe ad eseguire l'istruzione \texttt{delete pi}.\\Quindi si uscirebbe da \texttt{foo} senza aver rilasciato la risorsa ottenendo il fenomeno di memory leak.\\
+\\La domanda da porsi ora \'e: quali tecniche si possono utilizzare affinch\'e il codice diventi exception safe? E quali, tra le varie tecniche, sono migliori e quindi pi\'u raccomandabili?
+\\ \\ \\ \\ \\
+\begin{large}\textbf{\textcolor{blu}{Gestione Risorse con Try-Catch}}\\ \\ \end{large}
+\'E possibile gestire le tre fasi delle risorse utilizzando il costrutto C++ \texttt{try-catch}. Bisogna seguire alcune regole:\\
+\begin{enumerate}
+\item Si crea un blocco \texttt{try-catch} per ogni risorsa acquisita (non per ogni suo utilizzo).
+\item Il blocco si apre subito dopo l'acquisizione. \\Infatti se l'acquisizione dovesse fallire non avremmo nulla da rilasciare.
+\item La responsabilit\'a \texttt{try-catch} \'e di proteggere quella singola risorsa per cui \'e stato progettato, senza preoccuparsi delle altre.
+\item Al termine del blocco \texttt{try} (appena prima del \texttt{catch}) bisogna effettuare la normale restituzione della risorsa.\\ Questo rappresenta infatti il caso NON eccezionale.
+\item La clausola \texttt{catch} deve usare la forma \texttt{...} ovvero:\\ \\ \texttt{catch(...) \{ \textcolor{grigio}{// Codice del blocco catch.} \} }\\ \\ Questo perch\'e non interessa nello specifico che errore si \'e verificato, bisogna solamente rilasciare la risorsa.\\
+\item Nella clausola \texttt{catch} bisogna effettuare due operazioni: la prima \'e, appunto, il rilascio della risorsa. La seconda \'e rilanciare l'eccezione catturata usando l'istruzione \texttt{throw}. \\
+\end{enumerate}
+Vediamo l'esempio di codice dal punto di vista dell'utente.\\ \\
+\texttt{void codice\_utente() \{ \\ \\ \tab Risorsa* r1 = acquisisci\_risorsa(); \\ \\ \tab \textcolor{grigio}{// Blocco che protegge la risorsa 1.} \\ \tab try \{ \\ \\ \tab \tab uso\_risorsa(r1); \\ \tab \tab Risorsa* r2 = acquisisci\_risorsa(); \\ \\ \tab \tab \textcolor{grigio}{// Blocco che protegge la risorsa 2.} \\ \tab \tab try \{ \\ \\ \tab \tab \tab uso\_risorse(r1,r2); \\ \tab \tab \tab restituisci\_risorsa(r2); \\ \tab \tab \} \\ \tab \tab catch(...) \{ \\ \\ \tab \tab \tab restituisci\_risorsa(r2); \\ \tab \tab \tab throw; \\ \tab \tab \} \\ \\ \tab \tab restituisci\_risorsa(r1); \\ \tab \} \\ \tab catch(...) \{ \\ \\ \tab \tab restituisci\_risorsa(r1); \\ \tab \tab throw; \\ \tab \} \\ \}} 
+\\ \\ \\ \\ \\
+\begin{large}\textbf{\textcolor{blu}{Idioma RAII}} \\ \\ \end{large}
+Un'altra tecnica per la gestione delle risorse \'e rappresentata dall'idioma RAII anche detto \textbf{RAII-RRID}.\\ \\ L'acronimo sta per Resource Acquisition Is Initializaton - Resource Release Is Destruction. \\ \\
+Infatti segue alla lettera il suo significato RAII; quando l'oggetto \'e inizializzato automaticamente acquisice la risorsa. \\L'acquisizione viene dunque inserita nel costruttore nel seguente modo: \\ \\ 
+\texttt{Gestore\_Risorsa() : r1(acquisici\_risorsa()) \{\}} \\ \\
+Quando viene invocato il costruttore la risorsa 1 viene inizializzata con il risultato della funzione \texttt{acquisisci\_risorsa}, se l'invocazione della funzione ha successo viene restituito un puntatore che viene salvato in \texttt{r1}, se invece l'invocazione non va a buon fine non viene acquisita nessuna risorsa e si uscir\'a dal costruttore in modalit\'a eccezzionale.\\
+\\Analogamente la seconda parte dell'acronimo RRID ci suggerisce che il rilascio delle risorse viene effettuato in fase di distruzione in questo modo:
+\\ \\ \texttt{\TILDE Gestore\_Risorsa() \{ restituisci\_risorsa(r1); \} } \\
+\\Questo idioma viene dunque usato per legare le risorse alla durata (vita) dell'oggetto.
+\\ \\ \\ \\ \\
+\begin{large}\textbf{\textcolor{blu}{Livelli di Exception Safety}} \\ \\ \end{large}
+Abbiamo detto che una porzione di codice si dice \textbf{exception safe} quando si comporta in maniera adeguata anche in presenza di comportamenti anomali segnalati tramite le eccezioni senzaa per\'o compromettere lo stato del programma. \\Esistono tre livelli di exception safety: \\
+\begin{itemize}
+\item \textbf{\textcolor{blu}{Base}}\\Se nel momento in cui si verificano eccezioni si mantengono queste propriet\'a: \\
+\begin{enumerate}
+\item Non si ha perdita di risorse.
+\item Il codice rimane neutrale rispetto alle eccezioni. Ovvero cattura l'eccezione e la rilancia senza modificarla, in questo modo anche altre parti di codice "a rischio" possono verificare la medesima eccezione cos\'i come \'e stata pensata. \\ \\ \\
+\item Anche in caso di uscita in modalit\'a eccezionale gli oggetti (risorse) sui quali si stava lavorando rimangono quanto meno distruggibili, senza causare quindi comportamenti indefiniti. \\
+\end{enumerate}
+\item \textbf{\textcolor{blu}{Forte}} \\ Detta anche \textbf{strong}, garantisce tutte le propriet\'a del livello base aggiungendo una sorta di atomicit\'a delle operazioni. \\Quindi se nella parte di codice a rischio una delle operazioni non va a buon fine tutti gli oggetti (risorse) utilizzati all'interno del blocco venogno riportati allo stato precedente la chiamata.\\
+\item \textbf{\textcolor{blu}{Nothrow}} \\ Quando l'esecuzione del codice garantisce di NON terminare in modalit\'a eccezionale. \\
+\\Si verifica in casi specifici come operazioni molto semplici che non hanno la possibilit\'a di generare eccezioni, oppurre se la funzione \'e in grado di gestire completamente al suo interno le eccezioni. \\ 
+\\Esistono anche un tipo di funzioni dette \textbf{noexcept} che, nell'impossibilit\'a di risolvere l'eccezione e proseguire in modo sicuro, determinano la terminazione di tutto il programma (come i distruttori).
+\\ \\ \\ \\
+\end{itemize} 
+\begin{large}\textbf{\textcolor{blu}{Libreria Standard e Exception Safety}} \\ \\ \end{large}
+I contenitori forniti dalla libreria standard (vector, list, deque, ecc...) garantiscono exception safety.\\ Ovviamente, dato che si parla di contenitori templatici (istanziati a partire da un qualunque tipo di dato \texttt{T}), \'e necessario che \texttt{T} a sua volta fornisca garanzie analoghe di esception safety. \\ \\
+Di base le operazioni su questi contenitori garantiscono un livello strong, tranne nei casi in cui esse operino su molti elementi contemporaneamente. \\In questo caso infatti risulterebbe troppo costoso il livello strong e si usa quindi il livello base.
+\\ \\ \\ \\ \\ \\ \\
+\begin{large} \textbf{\textcolor{blu}{Smart Pointer}} \\ \\ \end{large}
+Questo tipo di puntatori forniscono un supporto diretto per la gestione delle risorse. \\Abbiamo visto come l'idioma RAII si prestasse bene come aiuto in questo compito, ma diventa impegnativo (e comunque soggetto a possibili errori) scrivere una classe RAII per ogni tipo \texttt{T} ogni volta che si deve usare un \texttt{T*}. 
+\\Per questo la libreria standard ci fornisce classi templatiche che implementano diverse tipologie di \textbf{smart pointer} che sono: \\
+\begin{itemize}
+\item \textcolor{blu}{\textbf{Unique} - \texttt{std::unique\_ptr}} \\ Puntatore smart ad un oggetto di tipo \texttt{T}. \\ In particolare implementa il concetto di \textbf{owning}, ovvero considera solo l'unico proprietario della risorsa dandogli la responsabilit\'a di gestione di questa. \\ Non sono copiabili (violerebbe il requisito di unicit\'a) ma sono invece spostabili (spostano la propriet\'a della risorsa al nuovo gestore).\\Esempio.\\ \\
+\texttt{void foo(std::unique\_ptr<int> pj); \\ \\ void bar() \{ \\ \\ \tab std::unique\_ptr<int> pi(new int(42)); \\ \tab foo(pi); \textcolor{grigio}{// Errore di compilazione: copia non ammessa.} \\ \tab foo(std::move(pi)); \textcolor{grigio}{// Spostamento ammesso. \\ \tab // Da qui in poi pi non gestisce pi\'u nessuna risorsa.} \\ \}} \\
+\item \textcolor{blu}{\textbf{Shared} - \texttt{std::shared\_ptr}} \\ Puntatore smart ad un oggetto di tipo \texttt{T}. \\ Ogni volta che il puntatore viene copiato l'originale e la copia condividono la responsabilit\'a della (stessa) risorsa.\\ A livello di implementazione, la copia causa l'incremento al contatore di riferimenti alla risorsa (\textcolor{grigio}{reference counter)}, quando il puntatore viene distrutto decrementa il contatore e, qualora si accorgesse di essere l'ultimo, ne effettua il rilascio. \\ \\Esempio. \\ \\
+\texttt{void foo() \{ \\ \\ \tab std::shared\_pointer<int> pi; \{ \\ \\ \tab \tab \textcolor{grigio}{// RC = Reference Counter.}\\ \tab \tab std::shared\_ptr<int> pj(new int(42)); \textcolor{grigio}{// RC=1.} \\ \tab \tab pi = pj; \textcolor{grigio}{// Condivisione risorsa, RC=2.} \\ \tab \tab ++(*pi); \textcolor{grigio}{// Uso risorsa condivisa, valore = 43.} \\ \tab \tab ++(*pj); \textcolor{grigio}{// Uso risorsa condivisa, valore = 44.} \\ \tab \} \textcolor{grigio}{// Distruzione di pj, RC=1.} \\ \\ \tab ++(*pi); \textcolor{grigio}{// Uso risorsa, valore = 45.} \\ \} \textcolor{grigio}{// Distruzione di pi, RC=0 e rilascio risorsa.} }
+\\
+\item \textcolor{blu}{\textbf{Weak} - \texttt{std::weak\_ptr}} \\
+Un problema degli shared pointer \'e la possibilit\'a di ritrovarsi strutture cicliche di risorse che si puntano l'uno sull'altra. \\In questo caso le risorse comprese nel ciclo mantengono dei reference counter positivi anche se non sono pi\'u raggiungibili, causando memory leak. \\ Per risolvere questo problema si usano i \textbf{weak pointer} che sono puntatori ad una risorsa condivisa che per\'o non partecipano attivamente alla gestione della risorsa. \\
+\\ Sostanzialmente un weak pointer non accede direttamente alla risorsa, prima controlla che sia ancora disponibile invocando il metodo \texttt{lock()} che da come risultato uno shared pointer. Se la risorsa non \'e pi\'u disponibile lo shared pointer ottenuto sar\'a nullo. \\ \\ Esempio. \\ \\
+\texttt{void maybe\_print(std::weak\_ptr<int> wp) \{ \\ \\ \tab if (auto sp2 == wp.lock()) \\ \tab \tab std::cout << *sp2; \\ \tab else \\ \tab \tab std::cout << "Non pi\'u disponibile"; \\ \} \\ \\ void foo() \{ \\ \\ \tab std::weak\_ptr<int> wp; \{ \\ \tab \tab auto sp = std::make\_shared<int>(42); \\ \tab \tab wp = sp; \textcolor{grigio}{// wp non incrementa il RC della risorsa.} \\ \tab \tab *sp = 55; \\ \tab \tab maybe\_print(wp); \textcolor{grigio}{// Stampa 55.} \\ \tab \} \textcolor{grigio}{// sp viene distrutto insieme alla risorsa.} \\ \\ \tab maybe\_print(wp); \textcolor{grigio}{// Stampa "Non pi\'u disponibile".} \\ \} }
+\end{itemize}
+\end{document}
+
+ 
